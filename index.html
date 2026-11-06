@@ -1,0 +1,1620 @@
+<!doctype html>
+<html lang="nn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ønskje</title>
+<meta name="description" content="Ønskjelister utan reklame. Ranger ønska, del lista og la familien reservere det dei vil gi.">
+<meta property="og:title" content="Ønskje – ønskjelista mi">
+<meta property="og:description" content="Sjå ønskja og reserver det du vil gi. Den som eig lista, ser ikkje kva som er reservert.">
+<meta property="og:image" content="https://lillerud-land1.github.io/onskje/icons/icon-512.png">
+<meta name="theme-color" content="#ECEFF3">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ønskje">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ECEFF3;
+  --flate: #FFFFFF;
+  --flate2: #F5F7FA;
+  --blekk: #1C2233;
+  --gra: #5F677B;
+  --linje: #DDE2E9;
+  --linje2: #C7CED9;
+  --aksent: #C92F5E;
+  --ok: #1F7553;
+  --okbg: #E2F1E9;
+  --fare: #B42318;
+  --lf: var(--aksent);
+  --font: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --topp-h: 58px;
+  --faner-h: 62px;
+  --botn: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--blekk);
+  font: 400 16px/1.5 var(--font); font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  padding-bottom: calc(var(--faner-h) + var(--botn));
+  min-height: 100dvh;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+img { display: block; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--lf) 55%, transparent); outline-offset: 2px; border-radius: 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.ik { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Topp og faner ---------- */
+.topp {
+  position: sticky; top: 0; z-index: 20; height: calc(var(--topp-h) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) max(14px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
+  display: flex; align-items: center; gap: 12px; background: var(--bg); transition: background .2s;
+}
+.merke { display: flex; align-items: center; gap: 9px; text-decoration: none; font-size: 23px; font-weight: 800; font-stretch: 82%; letter-spacing: -0.02em; margin-right: auto; }
+.merke svg { width: 20px; height: 26px; }
+.merke svg .lappform { fill: var(--aksent); }
+.merke svg .hol { fill: var(--bg); }
+body.farga .topp { background: var(--lf); color: #fff; }
+body.farga .merke svg .lappform { fill: #fff; }
+body.farga .merke svg .hol { fill: var(--lf); }
+.kontoknapp { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid currentColor; background: transparent; display: grid; place-items: center; font-weight: 700; font-size: 17px; text-transform: uppercase; }
+.kontoknapp svg.ik { width: 21px; height: 21px; }
+.kontoknapp.prikk { position: relative; }
+.kontoknapp.prikk::after { content: ''; position: absolute; top: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--aksent); border: 2px solid var(--bg); }
+body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf); }
+
+.faner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  height: calc(var(--faner-h) + var(--botn)); padding-bottom: var(--botn);
+  background: var(--flate); border-top: 1px solid var(--linje);
+}
+.faner a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; font-size: 12.5px; font-weight: 550; color: var(--gra); }
+.faner a[aria-current="page"] { color: var(--blekk); font-weight: 700; }
+.faner a[aria-current="page"] svg.ik { stroke-width: 2.3; }
+@media (min-width: 860px) {
+  body { padding-bottom: 0; }
+  .faner { position: static; display: flex; height: auto; padding: 0; background: none; border: 0; gap: 4px; margin-right: 8px; }
+  .faner a { flex-direction: row; gap: 8px; font-size: 15px; padding: 8px 14px; border-radius: 999px; color: inherit; opacity: .72; }
+  .faner a[aria-current="page"] { opacity: 1; background: color-mix(in srgb, currentColor 10%, transparent); }
+  .faner a svg.ik { width: 19px; height: 19px; }
+}
+
+/* ---------- Sider ---------- */
+.side { max-width: 760px; margin: 0 auto; padding: 6px max(18px, env(safe-area-inset-left)) 120px; }
+.sidehovud { display: flex; align-items: center; gap: 12px; margin: 14px 0 18px; }
+.sidetittel { font-size: clamp(30px, 7vw, 40px); line-height: 1.05; font-weight: 780; font-stretch: 84%; letter-spacing: -0.015em; margin: 0; flex: 1; text-wrap: balance; }
+.mellomtittel { font-size: 19px; font-weight: 700; font-stretch: 90%; margin: 32px 0 10px; }
+.dempa { color: var(--gra); }
+.panel { background: var(--flate); border: 1px solid var(--linje); border-radius: 20px; }
+.lastar-tekst { color: var(--gra); padding: 40px 0; text-align: center; }
+
+/* ---------- Knappar ---------- */
+.knapp {
+  height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--linje2);
+  background: var(--flate); color: var(--blekk); font-weight: 650; font-size: 16px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap;
+}
+.knapp:hover { border-color: var(--blekk); }
+.knapp:active { transform: scale(.98); }
+.knapp.hoved { background: var(--blekk); border-color: var(--blekk); color: #fff; }
+.knapp.farge { background: var(--lf); border-color: var(--lf); color: #fff; }
+.knapp.fare { color: var(--fare); border-color: color-mix(in srgb, var(--fare) 35%, transparent); }
+.knapp.heil { width: 100%; }
+.knapp.liten { height: 40px; padding: 0 16px; font-size: 15px; }
+.knapp[disabled] { opacity: .55; pointer-events: none; }
+.knapp svg.ik { width: 20px; height: 20px; }
+.lenkjeknapp { background: none; border: 0; padding: 4px 2px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; color: inherit; }
+
+/* ---------- Listene mine ---------- */
+.listerader { list-style: none; margin: 0; padding: 0; overflow: hidden; }
+.listerader li + li { border-top: 1px solid var(--linje); }
+.listerad { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px 14px 18px; text-decoration: none; }
+.listerad:hover { background: var(--flate2); }
+.lapp {
+  width: 42px; height: 54px; background: var(--lf); color: #fff; position: relative;
+  clip-path: polygon(24% 0, 76% 0, 100% 18%, 100% 100%, 0 100%, 0 18%);
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; border-radius: 0 0 7px 7px;
+  font-weight: 800; font-stretch: 78%; font-size: 21px; line-height: 1;
+}
+.lapp::before { content: ''; position: absolute; top: 8px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--flate); }
+.lr-tekst { min-width: 0; display: flex; flex-direction: column; }
+.lr-tekst strong { font-size: 18px; font-weight: 680; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-meta { color: var(--gra); font-size: 14.5px; display: flex; flex-wrap: wrap; column-gap: 12px; }
+.lr-meta .snart { color: var(--lf); font-weight: 650; }
+.mini { display: flex; }
+.mini span { width: 38px; height: 38px; border-radius: 10px; background: var(--flate2); border: 2px solid var(--flate); overflow: hidden; margin-left: -12px; }
+.mini span:first-child { margin-left: 0; }
+.mini img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+@media (max-width: 420px) { .mini span:nth-child(n+3) { display: none; } }
+.fjern { border: 0; background: none; color: var(--gra); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+.fjern:hover { background: var(--flate2); color: var(--blekk); }
+
+.tomboks { text-align: left; padding: 28px 24px 26px; }
+.tomboks h2 { font-size: 22px; font-weight: 720; font-stretch: 90%; margin: 0 0 6px; }
+.tomboks p { margin: 0 0 18px; color: var(--gra); max-width: 46ch; }
+.tomboks .knappar { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.notis { margin-top: 18px; padding: 16px 18px; border-radius: 18px; background: color-mix(in srgb, var(--aksent) 9%, var(--flate)); display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.notis p { margin: 0; flex: 1 1 260px; font-size: 15px; }
+
+/* ---------- Lista (helt) ---------- */
+.helt { background: var(--lf); color: #fff; padding: 4px max(18px, env(safe-area-inset-left)) 26px; }
+.helt-inn { max-width: 760px; margin: 0 auto; }
+.tilbake { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600; font-size: 15px; opacity: .85; padding: 6px 0; }
+.tilbake svg.ik { width: 18px; height: 18px; }
+.helt h1 { font-size: clamp(38px, 10vw, 62px); line-height: .98; font-weight: 800; font-stretch: 76%; letter-spacing: -0.01em; margin: 10px 0 10px; text-wrap: balance; overflow-wrap: anywhere; }
+.helt-tekst { margin: 0 0 8px; max-width: 54ch; white-space: pre-line; opacity: .92; }
+.helt-info { margin: 0; font-size: 15.5px; opacity: .92; }
+.helt-info b { font-weight: 700; }
+.helt-knappar { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.helt .knapp { border-color: rgba(255,255,255,.55); background: transparent; color: #fff; }
+.helt .knapp:hover { border-color: #fff; }
+.helt .knapp.kvit { background: #fff; border-color: #fff; color: var(--blekk); }
+.eigarnotis { background: color-mix(in srgb, #fff 16%, transparent); border-radius: 14px; padding: 12px 14px; margin-top: 16px; font-size: 15px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.eigarnotis span { flex: 1 1 220px; }
+
+.verktoy { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; flex-wrap: wrap; }
+.verktoy .hint { font-size: 14px; color: var(--gra); margin-left: auto; }
+.bryter { display: inline-flex; background: #DFE3EA; border-radius: 999px; padding: 3px; }
+.bryter button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--gra); display: inline-flex; align-items: center; gap: 6px; }
+.bryter button svg.ik { width: 18px; height: 18px; }
+.bryter button[aria-pressed="true"] { background: var(--flate); color: var(--blekk); box-shadow: 0 1px 2px rgba(28,34,51,.12); }
+
+/* ---------- Rangert liste ---------- */
+.ranka { list-style: none; margin: 0; padding: 0; background: var(--flate); border: 1px solid var(--linje); border-radius: 20px; }
+.rad { display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; column-gap: 8px; align-items: center; padding: 10px 6px 10px 6px; position: relative; }
+.rad + .rad { border-top: 1px solid var(--linje); }
+.rang { font-size: 38px; line-height: 1; font-weight: 800; font-stretch: 75%; color: var(--lf); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.rad:first-child .rang { font-size: 50px; }
+.rad-opne { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; text-align: left; background: none; border: 0; padding: 4px; border-radius: 12px; min-width: 0; }
+.rad-opne:hover .tittel { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.bilde { width: 64px; height: 64px; border-radius: 13px; background: var(--flate2); overflow: hidden; display: grid; place-items: center; flex: none; position: relative; }
+.bilde img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.bilde.tom::after { content: attr(data-b); font-size: 26px; font-weight: 800; font-stretch: 80%; color: color-mix(in srgb, var(--lf) 70%, var(--flate2)); }
+.rad-tekst { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tittel { font-size: 16.5px; font-weight: 620; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.fav { display: inline-flex; vertical-align: -3px; margin-left: 6px; color: var(--lf); }
+.fav svg.ik { width: 17px; height: 17px; fill: currentColor; }
+.meta { display: flex; flex-wrap: wrap; column-gap: 10px; font-size: 14px; color: var(--gra); }
+.meta b { color: var(--blekk); font-weight: 700; font-size: 15px; }
+.notat { font-size: 14px; color: var(--gra); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.handtak { width: 44px; height: 56px; border: 0; background: none; color: var(--linje2); display: grid; place-items: center; touch-action: none; cursor: grab; border-radius: 12px; }
+.handtak:hover, .handtak:focus-visible { color: var(--gra); }
+.handtak svg.ik { width: 24px; height: 24px; fill: currentColor; stroke: none; }
+.ranka.drarliste { user-select: none; -webkit-user-select: none; }
+.rad.drar { background: var(--flate); box-shadow: 0 12px 30px -10px rgba(28,34,51,.35), 0 0 0 2px var(--lf); border-radius: 16px; z-index: 2; }
+.rad.drar .handtak { color: var(--lf); cursor: grabbing; }
+.rad-res { grid-column: 2 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 4px 4px 4px 82px; }
+.rad.reservert .bilde img, .rute.reservert .bilde img { opacity: .5; }
+.rad.reservert .tittel { color: var(--gra); }
+
+.res-status { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--ok); background: var(--okbg); border-radius: 999px; padding: 5px 12px 5px 9px; }
+.res-status svg.ik { width: 17px; height: 17px; stroke-width: 2.4; }
+.res-status.mi { background: var(--ok); color: #fff; }
+.res-status .lenkjeknapp { padding: 0 0 0 4px; font-size: 14px; color: inherit; }
+.res-knapp { border-color: var(--lf); color: var(--lf); }
+.res-knapp:hover { background: var(--lf); color: #fff; border-color: var(--lf); }
+
+/* ---------- Rutenett ---------- */
+.rutenett { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+.rute { background: var(--flate); border: 1px solid var(--linje); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+.rute-opne { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; flex: 1; }
+.rute .bilde { width: 100%; height: auto; aspect-ratio: 1; border-radius: 0; }
+.rute .bilde img { padding: 10px; }
+.rute .bilde.tom::after { font-size: 54px; }
+.rang-merke { position: absolute; top: 9px; left: 9px; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; background: var(--lf); color: #fff; display: grid; place-items: center; font-weight: 800; font-stretch: 80%; font-size: 17px; }
+.rute-tekst { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+.rute .tittel { font-size: 15.5px; }
+.rute .rad-res { padding: 0 12px 12px; grid-column: auto; }
+
+.fab {
+  position: fixed; z-index: 25; right: max(18px, calc(50% - 362px)); bottom: calc(var(--faner-h) + var(--botn) + 16px);
+  height: 56px; padding: 0 24px 0 20px; border-radius: 999px; border: 0; background: var(--blekk); color: #fff;
+  font-weight: 700; font-size: 16.5px; display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 14px 28px -10px rgba(28,34,51,.55);
+}
+.fab:active { transform: scale(.97); }
+@media (min-width: 860px) { .fab { bottom: 28px; } }
+
+/* ---------- Finn ---------- */
+.sokeskjema { display: flex; gap: 10px; }
+.sokefelt { flex: 1; position: relative; display: block; }
+.sokefelt svg.ik { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gra); pointer-events: none; }
+.sokefelt input { width: 100%; height: 56px; border-radius: 18px; border: 1.5px solid var(--linje2); background: var(--flate); padding: 0 16px 0 48px; font-size: 17px; }
+.sokefelt input:focus { outline: none; border-color: var(--blekk); box-shadow: 0 0 0 4px rgba(28,34,51,.10); }
+.sokeskjema .knapp { height: 56px; border-radius: 18px; padding: 0 22px; }
+.brikker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.brikke { height: 38px; padding: 0 15px; border-radius: 999px; border: 1.5px solid var(--linje2); background: var(--flate); font-size: 15px; font-weight: 560; }
+.brikke:hover { border-color: var(--blekk); }
+.brikke[aria-pressed="true"] { background: var(--blekk); color: #fff; border-color: var(--blekk); }
+.pj { display: flex; align-items: center; gap: 16px; margin-top: 18px; padding: 18px 20px; border-radius: 20px; background: var(--blekk); color: #fff; text-decoration: none; }
+.pj-tekst { flex: 1; display: flex; flex-direction: column; }
+.pj-tekst strong { font-size: 19px; font-weight: 720; font-stretch: 92%; }
+.pj-tekst span { opacity: .78; font-size: 15px; }
+.butikkar { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); background: var(--flate); border: 1px solid var(--linje); border-radius: 20px; overflow: hidden; }
+.butikkar li { border-bottom: 1px solid var(--linje); margin-bottom: -1px; }
+.butikkar a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 14px 18px; text-decoration: none; }
+.butikkar a:hover { background: var(--flate2); }
+.butikkar strong { font-weight: 640; }
+.butikkar span { font-size: 13.5px; color: var(--gra); }
+.lim { margin-top: 8px; }
+.lim > p { margin: 0 0 12px; max-width: 56ch; }
+.lim.blink .lim-rad input { animation: blink 1.2s ease 2; }
+@keyframes blink { 50% { border-color: var(--aksent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--aksent) 22%, transparent); } }
+.lim-rad { display: flex; gap: 8px; }
+.lim-rad input { flex: 1; min-width: 0; }
+.lim-rad .knapp { height: 50px; border-radius: 14px; }
+.fv-kort { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 16px; align-items: center; padding: 14px; margin-top: 14px; }
+.fv-kort .bilde { width: 84px; height: 84px; }
+.fv-kort strong { display: block; font-size: 17px; line-height: 1.3; }
+.fv-kort .knapp { grid-column: 1 / -1; }
+.opnelenkje { margin-top: 26px; }
+
+/* ---------- Ark (dialogar) ---------- */
+.ark-bak { position: fixed; inset: 0; z-index: 60; background: rgba(18, 22, 34, .45); display: flex; align-items: flex-end; justify-content: center; }
+.ark-bak[hidden] { display: none; }
+.ark {
+  width: 100%; max-width: 560px; max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--flate); border-radius: 26px 26px 0 0; padding: 10px 22px calc(22px + var(--botn));
+  animation: opp .26s cubic-bezier(.2, .85, .25, 1);
+}
+.ark-grep { width: 42px; height: 5px; border-radius: 3px; background: var(--linje2); margin: 0 auto 8px; }
+.ark-hovud { display: flex; align-items: flex-start; gap: 12px; margin: 6px 0 4px; }
+.ark-hovud h2 { flex: 1; font-size: 24px; line-height: 1.15; font-weight: 760; font-stretch: 86%; margin: 6px 0 0; overflow-wrap: anywhere; }
+.lukk { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--flate2); display: grid; place-items: center; flex: none; }
+.lukk svg.ik { width: 20px; height: 20px; }
+.ark p { margin: 8px 0; }
+@keyframes opp { from { transform: translateY(40px); opacity: 0; } }
+@media (min-width: 700px) {
+  .ark-bak { align-items: center; padding: 20px; }
+  .ark { border-radius: 26px; padding-bottom: 24px; }
+  .ark-grep { display: none; }
+}
+
+.felt { display: block; margin: 14px 0 0; }
+.felt > span { display: block; font-size: 14.5px; font-weight: 650; margin-bottom: 6px; }
+.felt > small { display: block; color: var(--gra); font-size: 13.5px; margin-top: 5px; }
+input[type=text], input[type=url], input[type=search], input[type=date], input[type=password], input[type=number], textarea, select {
+  width: 100%; font-size: 16px; background: var(--flate2); border: 1.5px solid var(--linje2); border-radius: 13px; padding: 12px 14px; color: var(--blekk);
+}
+textarea { resize: vertical; min-height: 76px; line-height: 1.45; }
+select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235F677B' stroke-width='2'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blekk); background-color: var(--flate); box-shadow: 0 0 0 4px rgba(28,34,51,.10); }
+.to-felt { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sjekk { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-weight: 600; cursor: pointer; }
+.sjekk input { width: 22px; height: 22px; accent-color: var(--lf); }
+details.fleire { margin-top: 14px; }
+details.fleire summary { cursor: pointer; font-weight: 650; color: var(--gra); padding: 6px 0; }
+.ark-knappar { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.ark-knappar .rad2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fv-melding { font-size: 14px; margin: 8px 0 0; min-height: 1px; }
+.fv-melding.lastar { color: var(--gra); }
+.fv-melding.ok { color: var(--ok); }
+.fv-melding.feil { color: var(--fare); }
+.skjema-bilde { display: none; margin-top: 14px; }
+.skjema-bilde.vis { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; }
+.skjema-bilde .bilde { width: 76px; height: 76px; }
+.feilmelding { color: var(--fare); font-size: 14.5px; margin: 12px 0 0; }
+.feilmelding:empty { display: none; }
+
+.brikker.anledning { margin-top: 4px; }
+.fargeval { display: flex; gap: 10px; flex-wrap: wrap; }
+.fargeval label { position: relative; cursor: pointer; }
+.fargeval input { position: absolute; opacity: 0; inset: 0; }
+.fargeval span { display: block; width: 40px; height: 40px; border-radius: 50%; background: var(--c); border: 3px solid var(--flate); box-shadow: 0 0 0 1.5px var(--linje2); }
+.fargeval input:checked + span { box-shadow: 0 0 0 2.5px var(--blekk); }
+.fargeval input:focus-visible + span { outline: 3px solid var(--blekk); outline-offset: 3px; }
+
+.tv-bilde { background: var(--flate2); border-radius: 18px; aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden; margin: 6px 0 10px; }
+.tv-bilde img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; padding: 14px; }
+.tv-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; color: var(--gra); }
+.tv-meta b { font-size: 22px; color: var(--blekk); font-weight: 750; font-stretch: 90%; }
+.tv-notat { white-space: pre-line; background: var(--flate2); border-radius: 14px; padding: 12px 14px; }
+.lenkjeboks { display: flex; gap: 8px; margin-top: 14px; }
+.lenkjeboks input { flex: 1; min-width: 0; font-size: 15px; }
+.lenkjeboks .knapp { height: 50px; border-radius: 14px; }
+.kode { font-size: 24px; font-weight: 750; letter-spacing: .06em; text-align: center; background: var(--flate2); border-radius: 16px; padding: 18px 10px; margin: 14px 0; font-variant-numeric: tabular-nums; user-select: all; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--faner-h) + var(--botn) + 88px); z-index: 80; transform: translate(-50%, 20px);
+  background: var(--blekk); color: #fff; border-radius: 14px; padding: 12px 18px; font-size: 15px; font-weight: 550;
+  max-width: min(92vw, 460px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; text-align: center;
+}
+.toast.vis { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 860px) { .toast { bottom: 100px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="topp">
+  <a class="merke" href="#/" aria-label="Ønskje, til listene mine">
+    <svg viewBox="0 0 20 26" aria-hidden="true"><path class="lappform" d="M5 0h10l5 4.5V23a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V4.5z"/><circle class="hol" cx="10" cy="5.6" r="2.1"/></svg>
+    ønskje
+  </a>
+  <nav class="faner" aria-label="Hovudmeny">
+    <a href="#/" data-fane="lister"><svg class="ik" viewBox="0 0 24 24"><path d="M8 3h8l4 3.6V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.6z"/><circle cx="12" cy="7.5" r="1.4"/><path d="M8 13h8M8 17h5"/></svg>Listene mine</a>
+    <a href="#/finn" data-fane="finn"><svg class="ik" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Finn</a>
+    <a href="#/delt" data-fane="delt"><svg class="ik" viewBox="0 0 24 24"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14"/><path d="M12 7c-1.5-3-5-4-5.5-1.8C6.1 7 9.5 7 12 7zm0 0c1.5-3 5-4 5.5-1.8C17.9 7 14.5 7 12 7z"/></svg>Delt med meg</a>
+  </nav>
+  <button class="kontoknapp" id="kontoknapp" data-act="konto" aria-label="Konto"></button>
+</header>
+<main id="app"></main>
+<div class="ark-bak" id="arkbak" hidden><div class="ark" id="ark" role="dialog" aria-modal="true" aria-labelledby="arktittel"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+// ====================================================================
+// Ønskje – ønskjelister utan støy. Lagra på serveren (Cloudflare Worker + D1).
+// ====================================================================
+
+const API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8788' : 'https://onskje.brannlogg-admin.workers.dev';
+const LS = { token: 'onskje.token', namn: 'onskje.namn', cache: 'onskje.lister', folgjer: 'onskje.folgjer', res: 'onskje.res', mittnamn: 'onskje.mittnamn', sist: 'onskje.sistliste' };
+
+const FARGAR = {
+  bringebaer: ['#C92F5E', 'Bringebær'],
+  hav: ['#2E6BD0', 'Hav'],
+  furu: ['#1F7553', 'Furu'],
+  plomme: ['#7347BC', 'Plomme'],
+  rav: ['#A5620C', 'Rav'],
+  blekk: ['#1C2233', 'Blekk'],
+};
+const ANLEDNINGAR = [['jul', 'Jul'], ['bursdag', 'Bursdag'], ['konfirmasjon', 'Konfirmasjon'], ['bryllaup', 'Bryllaup'], ['baby', 'Baby'], ['anna', 'Anna']];
+const BUTIKKAR = [
+  ['Komplett', 'komplett.no', q => `https://www.komplett.no/search?q=${q}`],
+  ['Elkjøp', 'elkjop.no', q => `https://www.elkjop.no/search?q=${q}`],
+  ['Power', 'power.no', q => `https://www.power.no/search/?q=${q}`],
+  ['XXL', 'xxl.no', q => `https://www.xxl.no/search?query=${q}`],
+  ['Clas Ohlson', 'clasohlson.com', q => `https://www.clasohlson.com/no/search?text=${q}`],
+  ['Zalando', 'zalando.no', q => `https://www.zalando.no/katalog/?q=${q}`],
+  ['IKEA', 'ikea.com', q => `https://www.ikea.com/no/no/search/?q=${q}`],
+  ['ARK Bokhandel', 'ark.no', q => `https://www.ark.no/sok?text=${q}`],
+  ['Finn.no, brukt', 'finn.no', q => `https://www.finn.no/bap/forsale/search?q=${q}`],
+  ['Google Shopping', 'google.com', q => `https://www.google.com/search?udm=28&q=${q}`],
+];
+const IDEAR = ['Hovudtelefonar', 'Lego', 'Bøker', 'Parfyme', 'Turutstyr', 'Kaffimaskin', 'Smykke', 'Brettspel', 'Gåvekort', 'Hettegenser'];
+const MND = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+
+const IK = {
+  pluss: '<svg class="ik" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  sok: '<svg class="ik" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
+  tilbake: '<svg class="ik" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  lukk: '<svg class="ik" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  del: '<svg class="ik" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
+  penn: '<svg class="ik" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+  ut: '<svg class="ik" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  hake: '<svg class="ik" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  hjarte: '<svg class="ik" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/></svg>',
+  grep: '<svg class="ik" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+  rangert: '<svg class="ik" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 5l1.5-1V8M3.8 14.2c.4-.7 2.4-.9 2.3.4 0 .9-2.3 1.9-2.3 3.4h2.4"/></svg>',
+  rutenett: '<svg class="ik" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>',
+  lim: '<svg class="ik" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9.5 11h5M9.5 15h5"/></svg>',
+  person: '<svg class="ik" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg>',
+  pil: '<svg class="ik" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+};
+
+// ---------- Tilstand ----------
+const les = (k, std) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? std; } catch { return std; } };
+const S = {
+  token: localStorage.getItem(LS.token) || '',
+  namn: localStorage.getItem(LS.namn) || '',
+  lister: les(LS.cache, []),
+  folgjer: les(LS.folgjer, []),
+  res: les(LS.res, {}),
+  lasta: false,
+  delt: {},
+  deltVis: {},
+  finn: { q: '', lim: '', fv: null, lastar: false, ute: false },
+};
+function lagre() {
+  try {
+    S.token ? localStorage.setItem(LS.token, S.token) : localStorage.removeItem(LS.token);
+    S.namn ? localStorage.setItem(LS.namn, S.namn) : localStorage.removeItem(LS.namn);
+    localStorage.setItem(LS.cache, JSON.stringify(S.lister));
+    localStorage.setItem(LS.folgjer, JSON.stringify(S.folgjer));
+    localStorage.setItem(LS.res, JSON.stringify(S.res));
+  } catch { /* fullt lager */ }
+}
+
+// ---------- Hjelparar ----------
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ALFA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const lagId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), x => ALFA[x % 62]).join('');
+const farge = k => (FARGAR[k] || FARGAR.bringebaer)[0];
+const etterPos = a => [...a].sort((x, y) => (x.pos ?? 0) - (y.pos ?? 0));
+const talFmt = p => new Intl.NumberFormat('nb-NO', { minimumFractionDigits: Number.isInteger(p) ? 0 : 2, maximumFractionDigits: 2 }).format(p);
+const kr = (p, valuta) => p == null ? '' : (valuta && valuta !== 'NOK' ? `${talFmt(p)} ${valuta}` : `${talFmt(p)} kr`);
+const ønske = n => n === 1 ? '1 ønske' : `${n} ønske`;
+const prisjakt = q => `https://www.prisjakt.no/search?query=${encodeURIComponent(q)}`;
+const finnListe = id => S.lister.find(l => l.id === id);
+const delLenkje = delid => `${location.origin}${location.pathname}#/d/${delid}`;
+
+function tolkPris(s) {
+  const t = String(s || '').replace(/[\s ]/g, '').replace(/kr|nok|,-/gi, '');
+  if (!t) return null;
+  let u = t;
+  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(u)) u = u.replace(/\./g, '').replace(',', '.');
+  else u = u.replace(',', '.');
+  const n = parseFloat(u);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
+}
+const prisTekst = p => p == null ? '' : String(p).replace('.', ',');
+
+function datoInfo(dato) {
+  if (!dato) return null;
+  const [y, m, d] = dato.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const i = new Date(); i.setHours(0, 0, 0, 0);
+  const n = Math.round((dt - i) / 864e5);
+  const dag = `${d}. ${MND[m - 1]}${y !== i.getFullYear() ? ' ' + y : ''}`;
+  const rel = n === 0 ? 'i dag' : n === 1 ? 'i morgon' : n > 1 ? `om ${n} dagar` : n === -1 ? 'i går' : `for ${-n} dagar sidan`;
+  return { dag, rel, n };
+}
+function nesteJul() {
+  const i = new Date();
+  let y = i.getFullYear();
+  if (i > new Date(y, 11, 24, 23, 59)) y++;
+  return `${y}-12-24`;
+}
+function namnliste(a) {
+  const n = a.map(r => r.antal > 1 ? `${r.namn} (${r.antal})` : r.namn);
+  return n.length < 2 ? n.join('') : n.slice(0, -1).join(', ') + ' og ' + n[n.length - 1];
+}
+function bilde(t, cls = '') {
+  const b = esc(((t.tittel || '?').trim()[0] || '?').toUpperCase());
+  if (!t.bilete) return `<span class="bilde tom ${cls}" data-b="${b}"></span>`;
+  return `<span class="bilde ${cls}" data-b="${b}"><img src="${esc(t.bilete)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('tom');this.remove()"></span>`;
+}
+
+let toastTid;
+function toast(t) {
+  const el = $('#toast');
+  el.textContent = t;
+  el.classList.add('vis');
+  clearTimeout(toastTid);
+  toastTid = setTimeout(() => el.classList.remove('vis'), 3200);
+}
+
+// ---------- Server ----------
+async function api(sti, { metode = 'GET', data } = {}) {
+  const h = {};
+  if (data !== undefined) h['Content-Type'] = 'application/json';
+  if (S.token) h.Authorization = 'Bearer ' + S.token;
+  let res;
+  try {
+    res = await fetch(API + sti, { method: metode, headers: h, body: data !== undefined ? JSON.stringify(data) : undefined });
+  } catch {
+    throw new Error('Fekk ikkje kontakt med serveren. Sjekk nettet og prøv igjen.');
+  }
+  const svar = await res.json().catch(() => ({}));
+  if (res.status === 401 && S.token && !sti.startsWith('/logg-inn') && !sti.startsWith('/nytt-passord')) {
+    loggUtLokalt();
+    vis();
+  }
+  if (!res.ok) throw Object.assign(new Error(svar.feil || 'Noko gjekk gale. Prøv igjen.'), { status: res.status });
+  return svar;
+}
+
+async function sikreKonto() {
+  if (S.token) return;
+  const d = await api('/konto/start', { metode: 'POST', data: {} });
+  S.token = d.token;
+  S.namn = '';
+  lagre();
+}
+
+function loggUtLokalt() {
+  S.token = '';
+  S.namn = '';
+  S.lister = [];
+  lagre();
+}
+
+async function hentMeg() {
+  if (!S.token) { S.lasta = true; return; }
+  try {
+    const d = await api('/meg');
+    S.namn = d.namn || '';
+    S.lister = d.lister.map(l => ({ ...l, ting: l.ting || [] }));
+    const m = new Map(S.folgjer.map(f => [f.delid, f]));
+    for (const f of d.folgjer) m.set(f.delid, { ...(m.get(f.delid) || {}), ...f });
+    S.folgjer = [...m.values()];
+    lagre();
+  } catch (e) {
+    if (e.status !== 401) console.warn(e);
+  }
+  S.lasta = true;
+  const r = rute();
+  if (r.side !== 'finn' && !document.activeElement?.closest('#app input, #app textarea')) vis();
+  else oppdaterKontoknapp();
+}
+
+const reinListe = l => ({ namn: l.namn, farge: l.farge, anledning: l.anledning || '', dato: l.dato || '', skildring: l.skildring || '', visning: l.visning || 'rangert' });
+const reinTing = t => ({ tittel: t.tittel, url: t.url || '', bilete: t.bilete || '', pris: t.pris ?? null, valuta: t.valuta || '', butikk: t.butikk || '', notat: t.notat || '', antal: t.antal || 1, favoritt: !!t.favoritt });
+
+async function lagreListe(l) {
+  await sikreKonto();
+  const d = await api(`/lister/${l.id}`, { metode: 'PUT', data: reinListe(l) });
+  l.delid = d.delid;
+  if (d.pos != null) l.pos = d.pos;
+  if (!finnListe(l.id)) S.lister.push(l);
+  lagre();
+  return l;
+}
+
+// ---------- Ruting ----------
+function rute() {
+  const [a, b] = location.hash.replace(/^#\/?/, '').split('/');
+  if (a === 'l' && b) return { side: 'liste', id: b };
+  if (a === 'd' && b) return { side: 'deltliste', delid: b };
+  if (a === 'finn') return { side: 'finn' };
+  if (a === 'delt') return { side: 'delt' };
+  return { side: 'lister' };
+}
+
+function vis() {
+  const r = rute();
+  const app = $('#app');
+  let farga = null;
+  if (r.side === 'liste') {
+    const l = finnListe(r.id);
+    if (l) farga = farge(l.farge);
+    app.innerHTML = visListe(r.id);
+  } else if (r.side === 'deltliste') {
+    const d = S.delt[r.delid];
+    if (d && d.data) farga = farge(d.data.liste.farge);
+    app.innerHTML = visDeltListe(r.delid);
+  } else if (r.side === 'finn') {
+    app.innerHTML = visFinn();
+  } else if (r.side === 'delt') {
+    app.innerHTML = visDelt();
+  } else {
+    app.innerHTML = visLister();
+  }
+  document.body.classList.toggle('farga', !!farga);
+  if (farga) document.body.style.setProperty('--lf', farga);
+  else document.body.style.removeProperty('--lf');
+  $('meta[name=theme-color]').content = farga || '#ECEFF3';
+  const fane = { lister: 'lister', liste: 'lister', finn: 'finn', delt: 'delt', deltliste: 'delt' }[r.side];
+  document.querySelectorAll('.faner a').forEach(a => { if (a.dataset.fane === fane) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  oppdaterKontoknapp();
+  const tittel = { lister: 'Listene mine', liste: finnListe(r.id)?.namn, finn: 'Finn', delt: 'Delt med meg', deltliste: S.delt[r.delid]?.data?.liste?.namn }[r.side];
+  document.title = tittel ? `${tittel} – Ønskje` : 'Ønskje';
+}
+
+function oppdaterKontoknapp() {
+  const k = $('#kontoknapp');
+  k.innerHTML = S.namn ? esc(S.namn[0]) : IK.person;
+  k.classList.toggle('prikk', !!S.token && !S.namn && S.lister.length > 0);
+  k.setAttribute('aria-label', S.namn ? `Konto: ${S.namn}` : 'Konto');
+}
+
+window.addEventListener('hashchange', () => {
+  lukkArk();
+  vis();
+  window.scrollTo(0, 0);
+});
+
+// ====================================================================
+// Visingar
+// ====================================================================
+function visLister() {
+  const L = etterPos(S.lister);
+  let h = `<div class="side"><div class="sidehovud"><h1 class="sidetittel">Listene mine</h1>${L.length ? `<button class="knapp liten" data-act="nyListe">${IK.pluss}Ny liste</button>` : ''}</div>`;
+  if (!L.length && S.token && !S.lasta) return h + `<p class="lastar-tekst">Hentar listene …</p></div>`;
+  if (!L.length) {
+    h += `<div class="panel tomboks">
+      <h2>Lag den første ønskjelista</h2>
+      <p>Éi liste for jul, éi for bursdagen, éi for ting du berre har lyst på. Du treng ikkje konto for å starte.</p>
+      <div class="knappar"><button class="knapp hoved" data-act="nyListe">${IK.pluss}Lag ei liste</button><a class="knapp" href="#/finn">${IK.sok}Finn noko å ønskje deg</a></div>
+    </div>`;
+    if (!S.token) h += `<p class="dempa" style="margin-top:18px">Har du konto frå før? <button class="lenkjeknapp" data-act="konto">Logg inn</button></p>`;
+    return h + '</div>';
+  }
+  h += `<ul class="panel listerader">${L.map(l => {
+    const n = l.ting.length;
+    const di = datoInfo(l.dato);
+    const bil = etterPos(l.ting).filter(t => t.bilete).slice(0, 3);
+    return `<li><a class="listerad" href="#/l/${esc(l.id)}" style="--lf:${farge(l.farge)}">
+      <span class="lapp" aria-hidden="true">${n}</span>
+      <span class="lr-tekst"><strong>${esc(l.namn)}</strong><span class="lr-meta"><span>${ønske(n)}</span>${di && di.n >= -1 ? `<span class="${di.n <= 30 ? 'snart' : ''}">${esc(di.dag)}, ${esc(di.rel)}</span>` : ''}</span></span>
+      <span class="mini" aria-hidden="true">${bil.map(t => `<span><img src="${esc(t.bilete)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`).join('')}</span>
+    </a></li>`;
+  }).join('')}</ul>`;
+  if (S.token && !S.namn) {
+    h += `<div class="notis"><p>Listene er berre lagra på denne eininga. Vel brukarnamn og passord, så kan du opne dei på mobil og PC òg.</p><button class="knapp liten hoved" data-act="konto">Vel brukarnamn</button></div>`;
+  }
+  return h + '</div>';
+}
+
+function visListe(id) {
+  const l = finnListe(id);
+  if (!l) {
+    if (S.token && !S.lasta) return `<div class="side"><p class="lastar-tekst">Hentar lista …</p></div>`;
+    return `<div class="side"><div class="panel tomboks" style="margin-top:20px"><h2>Fann ikkje lista</h2><p>Ho kan vere sletta, eller ligg på ein annan konto.</p><div class="knappar"><a class="knapp hoved" href="#/">Til listene mine</a></div></div></div>`;
+  }
+  const ting = etterPos(l.ting);
+  const di = datoInfo(l.dato);
+  const sum = ting.reduce((s, t) => s + (t.pris || 0) * (t.antal || 1), 0);
+  let h = `<section class="helt"><div class="helt-inn">
+    <a class="tilbake" href="#/">${IK.tilbake}Listene mine</a>
+    <h1>${esc(l.namn)}</h1>
+    ${l.skildring ? `<p class="helt-tekst">${esc(l.skildring)}</p>` : ''}
+    <p class="helt-info">${di ? `<b>${esc(di.dag)}</b>, ${esc(di.rel)}<br>` : ''}${ønske(ting.length)}${sum ? `, ca. ${kr(Math.round(sum))} til saman` : ''}</p>
+    <div class="helt-knappar">
+      <button class="knapp kvit" data-act="delListe" data-liste="${esc(l.id)}">${IK.del}Del lista</button>
+      <button class="knapp" data-act="endreListe" data-liste="${esc(l.id)}">${IK.penn}Endre</button>
+    </div>
+  </div></section><div class="side">`;
+  if (!ting.length) {
+    h += `<div class="panel tomboks" style="margin-top:20px">
+      <h2>Kva ønskjer du deg?</h2>
+      <p>Lim inn ei lenkje frå ein nettbutikk, så hentar Ønskje namn, bilete og pris. Eller skriv det inn sjølv.</p>
+      <div class="knappar"><button class="knapp hoved" data-act="nyTing" data-liste="${esc(l.id)}">${IK.pluss}Nytt ønske</button><a class="knapp" href="#/finn">${IK.sok}Finn på Prisjakt</a></div>
+    </div></div>`;
+    return h;
+  }
+  const v = l.visning === 'rutenett' ? 'rutenett' : 'rangert';
+  h += `<div class="verktoy">
+    <div class="bryter" role="group" aria-label="Vis som">
+      <button data-act="visning" data-v="rangert" data-liste="${esc(l.id)}" aria-pressed="${v === 'rangert'}">${IK.rangert}Rangert</button>
+      <button data-act="visning" data-v="rutenett" data-liste="${esc(l.id)}" aria-pressed="${v === 'rutenett'}">${IK.rutenett}Rutenett</button>
+    </div>
+    ${v === 'rangert' && ting.length > 1 ? `<span class="hint">Dra i prikkane for å endre rekkjefølgja</span>` : ''}
+  </div>`;
+  h += v === 'rangert'
+    ? `<ol class="ranka" data-liste="${esc(l.id)}">${ting.map((t, i) => radHtml(t, i, { eigar: true })).join('')}</ol>`
+    : `<ul class="rutenett">${ting.map((t, i) => ruteHtml(t, i, { eigar: true })).join('')}</ul>`;
+  h += `</div><button class="fab" data-act="nyTing" data-liste="${esc(l.id)}">${IK.pluss}Nytt ønske</button>`;
+  return h;
+}
+
+function tingMeta(t) {
+  return `<span class="meta">${t.pris != null ? `<b>${kr(t.pris, t.valuta)}</b>` : ''}${t.butikk ? `<span>${esc(t.butikk)}</span>` : ''}${t.antal > 1 ? `<span>${t.antal} stk.</span>` : ''}</span>`;
+}
+
+function radHtml(t, i, o) {
+  return `<li class="rad${o.reservert ? ' reservert' : ''}" data-ting="${esc(t.id)}">
+    <span class="rang" aria-label="Nummer ${i + 1}">${i + 1}</span>
+    <button class="rad-opne" data-act="${o.eigar ? 'opneTing' : 'opneDeltTing'}" data-ting="${esc(t.id)}">
+      ${bilde(t)}
+      <span class="rad-tekst">
+        <span class="tittel">${esc(t.tittel)}${t.favoritt ? `<span class="fav" title="Mest ønskt">${IK.hjarte}<span class="sr">Mest ønskt</span></span>` : ''}</span>
+        ${tingMeta(t)}
+        ${t.notat ? `<span class="notat">${esc(t.notat)}</span>` : ''}
+      </span>
+    </button>
+    ${o.eigar ? `<button class="handtak" data-drag aria-label="Flytt «${esc(t.tittel)}» opp eller ned med piltastane">${IK.grep}</button>` : ''}
+    ${o.res || ''}
+  </li>`;
+}
+
+function ruteHtml(t, i, o) {
+  return `<li class="rute${o.reservert ? ' reservert' : ''}" data-ting="${esc(t.id)}">
+    <button class="rute-opne" data-act="${o.eigar ? 'opneTing' : 'opneDeltTing'}" data-ting="${esc(t.id)}">
+      ${bilde(t)}
+      <span class="rang-merke" aria-label="Nummer ${i + 1}">${i + 1}</span>
+      <span class="rute-tekst"><span class="tittel">${esc(t.tittel)}${t.favoritt ? `<span class="fav" title="Mest ønskt">${IK.hjarte}</span>` : ''}</span>${tingMeta(t)}</span>
+    </button>
+    ${o.res || ''}
+  </li>`;
+}
+
+// ---------- Delt liste (slik andre ser ho) ----------
+function resInfo(t, reservert) {
+  const liste = (reservert && reservert[t.id]) || [];
+  const sum = liste.reduce((s, r) => s + r.antal, 0);
+  const mine = liste.filter(r => S.res[r.id]);
+  const andre = liste.filter(r => !S.res[r.id]);
+  return { liste, sum, mine, andre, att: Math.max(0, (t.antal || 1) - sum) };
+}
+function resHtml(t, ri) {
+  let h = '';
+  if (ri.mine.length) {
+    const n = ri.mine.reduce((s, r) => s + r.antal, 0);
+    h += `<span class="res-status mi">${IK.hake}Du kjøper ${n > 1 ? n + ' stk.' : 'denne'}<button class="lenkjeknapp" data-act="angre" data-res="${esc(ri.mine[0].id)}">Angre</button></span>`;
+  }
+  if (ri.andre.length) h += `<span class="res-status">${IK.hake}Reservert av ${esc(namnliste(ri.andre))}</span>`;
+  if (ri.att > 0) h += `<button class="knapp liten res-knapp" data-act="reserver" data-ting="${esc(t.id)}">${ri.sum ? `Eg kjøper (${ri.att} att)` : 'Eg kjøper denne'}</button>`;
+  return `<div class="rad-res">${h}</div>`;
+}
+
+function visDeltListe(delid) {
+  const d = S.delt[delid];
+  if (!d || (!d.data && !d.feil)) {
+    if (!d || !d.lastar) hentDelt(delid);
+    return `<div class="side"><p class="lastar-tekst">Hentar ønskjelista …</p></div>`;
+  }
+  if (d.feil) {
+    return `<div class="side"><div class="panel tomboks" style="margin-top:20px"><h2>Fann ikkje lista</h2><p>${esc(d.feil)}</p><div class="knappar"><button class="knapp" data-act="prøvDelt" data-delid="${esc(delid)}">Prøv igjen</button><a class="knapp" href="#/delt">Delt med meg</a></div></div></div>`;
+  }
+  const { liste: l, eigar, reservert, listeid } = d.data;
+  const val = S.deltVis[delid] || {};
+  const v = val.v || l.visning || 'rangert';
+  let ting = etterPos(d.data.ting);
+  const rang = new Map(ting.map((t, i) => [t.id, i]));
+  if (val.sort === 'pris') ting = [...ting].sort((a, b) => (a.pris ?? 1e12) - (b.pris ?? 1e12));
+  const di = datoInfo(l.dato);
+  let h = `<section class="helt"><div class="helt-inn">
+    <a class="tilbake" href="#/delt">${IK.tilbake}Delt med meg</a>
+    <h1>${esc(l.namn)}</h1>
+    ${l.skildring ? `<p class="helt-tekst">${esc(l.skildring)}</p>` : ''}
+    <p class="helt-info">${di ? `<b>${esc(di.dag)}</b>, ${esc(di.rel)}<br>` : ''}${ønske(ting.length)}${eigar ? '' : '. Trykk «Eg kjøper denne» på det du vil gi – den som eig lista, ser det ikkje.'}</p>
+    ${eigar ? `<div class="eigarnotis"><span>Dette er di eiga liste, slik andre ser ho. Reservasjonane er skjulte for deg, så overraskinga held.</span><a class="knapp kvit liten" href="#/l/${esc(listeid)}">Gå til lista</a></div>` : ''}
+  </div></section><div class="side">`;
+  if (!ting.length) return h + `<div class="panel tomboks" style="margin-top:20px"><h2>Lista er tom enno</h2><p>Kom tilbake seinare – ønska dukkar opp her når dei blir lagde til.</p></div></div>`;
+  h += `<div class="verktoy">
+    <div class="bryter" role="group" aria-label="Vis som">
+      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rangert" aria-pressed="${v === 'rangert'}">${IK.rangert}Rangert</button>
+      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rutenett" aria-pressed="${v === 'rutenett'}">${IK.rutenett}Rutenett</button>
+    </div>
+    <div class="bryter" role="group" aria-label="Sorter">
+      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="rang" aria-pressed="${val.sort !== 'pris'}">Ønska mest</button>
+      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="pris" aria-pressed="${val.sort === 'pris'}">Pris</button>
+    </div>
+  </div>`;
+  const rad = t => {
+    const ri = eigar ? null : resInfo(t, reservert);
+    const o = { eigar: false, reservert: ri && ri.att === 0, res: ri ? resHtml(t, ri) : '' };
+    return v === 'rutenett' ? ruteHtml(t, rang.get(t.id), o) : radHtml(t, rang.get(t.id), o);
+  };
+  h += v === 'rutenett' ? `<ul class="rutenett">${ting.map(rad).join('')}</ul>` : `<ol class="ranka">${ting.map(rad).join('')}</ol>`;
+  return h + '</div>';
+}
+
+async function hentDelt(delid, stille) {
+  S.delt[delid] = { ...(S.delt[delid] || {}), lastar: true };
+  try {
+    const data = await api(`/del/${encodeURIComponent(delid)}`);
+    S.delt[delid] = { data, lastar: false };
+    if (data.eigar) {
+      S.folgjer = S.folgjer.filter(f => f.delid !== delid);
+      lagre();
+    } else {
+      const f = S.folgjer.find(x => x.delid === delid);
+      const snap = { delid, namn: data.liste.namn, farge: data.liste.farge, n: data.ting.length };
+      if (f) Object.assign(f, snap);
+      else {
+        S.folgjer.unshift(snap);
+        if (S.token) api('/folgjer', { metode: 'POST', data: { delid } }).catch(() => {});
+      }
+      lagre();
+    }
+  } catch (e) {
+    if (stille && S.delt[delid]?.data) { S.delt[delid].lastar = false; return; }
+    S.delt[delid] = { feil: e.status === 404 ? 'Ho kan vere sletta, eller lenkja er feil.' : e.message, lastar: false };
+  }
+  const r = rute();
+  if (r.side === 'deltliste' && r.delid === delid) vis();
+}
+
+// ---------- Delt med meg ----------
+function visDelt() {
+  const F = S.folgjer;
+  let h = `<div class="side"><div class="sidehovud"><h1 class="sidetittel">Delt med meg</h1></div>`;
+  if (!F.length) {
+    h += `<div class="panel tomboks"><h2>Ingen delte lister enno</h2><p>Når nokon sender deg ei ønskjeliste frå Ønskje, ligg ho her etter at du har opna lenkja.</p></div>`;
+  } else {
+    h += `<ul class="panel listerader">${F.map(f => `<li style="display:flex;align-items:center;padding-right:8px">
+      <a class="listerad" style="flex:1;--lf:${farge(f.farge)}" href="#/d/${esc(f.delid)}">
+        <span class="lapp" aria-hidden="true">${f.namn ? (f.n ?? '') : '–'}</span>
+        <span class="lr-tekst"><strong>${f.namn ? esc(f.namn) : 'Lista finst ikkje lenger'}</strong><span class="lr-meta">${f.namn ? ønske(f.n || 0) : 'Ho er sletta av eigaren'}</span></span>
+        <span></span>
+      </a>
+      <button class="fjern" data-act="fjernFolgd" data-delid="${esc(f.delid)}" aria-label="Fjern «${esc(f.namn || 'lista')}» frå Delt med meg">${IK.lukk}</button>
+    </li>`).join('')}</ul>`;
+  }
+  h += `<form class="opnelenkje" data-skjema="opneLenkje">
+    <label class="felt"><span>Har du fått ei lenkje? Lim ho inn her</span>
+      <div class="lim-rad"><input type="url" name="lenkje" placeholder="https://lillerud-land1.github.io/onskje/#/d/…" autocomplete="off"><button class="knapp">Opne</button></div>
+    </label>
+    <p class="feilmelding" aria-live="polite"></p>
+  </form>`;
+  return h + '</div>';
+}
+
+// ---------- Finn ----------
+function visFinn() {
+  const q = S.finn.q;
+  let h = `<div class="side"><div class="sidehovud"><h1 class="sidetittel">Finn noko å ønskje deg</h1></div>
+    <form class="sokeskjema" data-skjema="sok" role="search">
+      <label class="sokefelt">${IK.sok}<input type="search" name="q" value="${esc(q)}" placeholder="Kva har du lyst på?" autocomplete="off" enterkeyhint="search" aria-label="Søk etter produkt"></label>
+      <button class="knapp hoved">Søk</button>
+    </form>
+    <div class="brikker" aria-label="Idear">${IDEAR.map(i => `<button class="brikke" data-act="ide" data-q="${esc(i)}" aria-pressed="${i === q}">${esc(i)}</button>`).join('')}</div>`;
+  if (q) {
+    const e = encodeURIComponent(q);
+    h += `<a class="pj" href="${esc(prisjakt(q))}" target="_blank" rel="noopener" data-act="ut">
+        <span class="pj-tekst"><strong>Samanlikn prisar på Prisjakt</strong><span>Sjå kven som sel «${esc(q)}» billegast</span></span>${IK.ut}
+      </a>
+      <h2 class="mellomtittel">Eller søk i ein butikk</h2>
+      <ul class="butikkar">${BUTIKKAR.map(([n, d, f]) => `<li><a href="${esc(f(e))}" target="_blank" rel="noopener" data-act="ut"><strong>${esc(n)}</strong><span>${esc(d)}</span></a></li>`).join('')}</ul>`;
+  }
+  h += limBoks();
+  return h + '</div>';
+}
+
+function limBoks() {
+  const f = S.finn;
+  let fv = '';
+  if (f.lastar) fv = `<p class="fv-melding lastar">Hentar namn, bilete og pris …</p>`;
+  else if (f.fv) {
+    const d = f.fv;
+    fv = `<div class="panel fv-kort">
+      ${bilde({ tittel: d.tittel || d.butikk, bilete: d.bilete })}
+      <div><strong>${esc(d.tittel || 'Fann ikkje namnet')}</strong>${tingMeta({ pris: d.pris, valuta: d.valuta, butikk: d.butikk })}${d.melding ? `<p class="fv-melding feil">${esc(d.melding)}</p>` : ''}</div>
+      <button class="knapp hoved heil" data-act="leggTilFunne">${IK.pluss}Legg til i ei liste</button>
+    </div>`;
+  }
+  return `<section class="lim" id="limboks">
+    <h2 class="mellomtittel">Fann du noko?</h2>
+    <p class="dempa">Kopier lenkja til produktet og lim ho inn her. Namn, bilete og pris blir henta automatisk.</p>
+    <form class="lim-rad" data-skjema="lim">
+      <input type="url" name="url" value="${esc(f.lim)}" placeholder="https://www.prisjakt.no/product.php?p=…" inputmode="url" autocomplete="off" aria-label="Lenkje til produktet">
+      <button type="button" class="knapp" data-act="limInnFinn">${IK.lim}Lim inn</button>
+    </form>
+    ${fv}
+  </section>`;
+}
+function visLimBoks() {
+  const el = $('#limboks');
+  if (el) el.outerHTML = limBoks();
+}
+
+async function finnHent(url) {
+  url = url.trim();
+  if (!/^https?:\/\/\S+\.\S+/i.test(url)) { toast('Det ser ikkje ut som ei lenkje. Ho skal byrje med https://'); return; }
+  S.finn.lim = url;
+  S.finn.fv = null;
+  S.finn.lastar = true;
+  visLimBoks();
+  try {
+    await sikreKonto();
+    S.finn.fv = await api('/forhandsvis?url=' + encodeURIComponent(url));
+  } catch (e) {
+    S.finn.fv = { url, tittel: '', bilete: '', pris: null, butikk: '', delvis: true, melding: e.message };
+  }
+  S.finn.lastar = false;
+  visLimBoks();
+}
+
+// ====================================================================
+// Ark (dialogar)
+// ====================================================================
+let førArk = null;
+function opneArk(html) {
+  const bak = $('#arkbak');
+  const ark = $('#ark');
+  if (bak.hidden) førArk = document.activeElement;
+  ark.innerHTML = `<div class="ark-grep" aria-hidden="true"></div>${html}`;
+  bak.hidden = false;
+  document.body.style.overflow = 'hidden';
+  ark.scrollTop = 0;
+  const fokus = ark.querySelector('[autofocus]') || ark.querySelector('.lukk');
+  setTimeout(() => fokus && fokus.focus({ preventScroll: true }), 30);
+}
+function lukkArk() {
+  const bak = $('#arkbak');
+  if (bak.hidden) return;
+  bak.hidden = true;
+  $('#ark').innerHTML = '';
+  document.body.style.overflow = '';
+  if (førArk && document.contains(førArk)) førArk.focus({ preventScroll: true });
+  førArk = null;
+}
+$('#arkbak').addEventListener('click', e => { if (e.target.id === 'arkbak') lukkArk(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#arkbak').hidden) lukkArk(); });
+const arkHovud = t => `<div class="ark-hovud"><h2 id="arktittel">${t}</h2><button class="lukk" data-act="lukk" aria-label="Lukk">${IK.lukk}</button></div>`;
+
+// ---------- Liste: ny / endre ----------
+function arkListe(l) {
+  const ny = !l;
+  l = l || { namn: '', farge: 'bringebaer', anledning: '', dato: '', skildring: '' };
+  opneArk(`${arkHovud(ny ? 'Ny ønskjeliste' : 'Endre lista')}
+  <form data-skjema="liste" data-liste="${ny ? '' : esc(l.id)}">
+    <div class="felt"><span>Kva er lista til?</span>
+      <div class="brikker anledning">${ANLEDNINGAR.map(([k, n]) => `<button type="button" class="brikke" data-act="anledning" data-k="${k}" aria-pressed="${l.anledning === k}">${n}</button>`).join('')}</div>
+      <input type="hidden" name="anledning" value="${esc(l.anledning)}">
+    </div>
+    <label class="felt"><span>Namn på lista</span><input type="text" name="namn" value="${esc(l.namn)}" maxlength="80" placeholder="Jul ${nesteJul().slice(0, 4)}" required ${ny ? 'autofocus' : ''}></label>
+    <label class="felt"><span>Dato</span><input type="date" name="dato" value="${esc(l.dato)}"><small>Valfritt. Viser kor mange dagar det er att.</small></label>
+    <label class="felt"><span>Melding til dei som ser lista</span><textarea name="skildring" maxlength="500" rows="2" placeholder="Storleik M på klede, sko 39.">${esc(l.skildring)}</textarea></label>
+    <div class="felt"><span>Farge</span>
+      <div class="fargeval">${Object.entries(FARGAR).map(([k, [c, n]]) => `<label title="${n}"><input type="radio" name="farge" value="${k}" ${l.farge === k ? 'checked' : ''} aria-label="${n}"><span style="--c:${c}"></span></label>`).join('')}</div>
+    </div>
+    <p class="feilmelding" aria-live="polite"></p>
+    <div class="ark-knappar">
+      <button class="knapp hoved heil">${ny ? 'Lag lista' : 'Lagre'}</button>
+      ${ny ? '' : `<button type="button" class="knapp fare heil" data-act="slettListe" data-liste="${esc(l.id)}">Slett lista</button>`}
+    </div>
+  </form>`);
+}
+
+// ---------- Del lista ----------
+function arkDel(l) {
+  const lenkje = delLenkje(l.delid);
+  opneArk(`${arkHovud(`Del «${esc(l.namn)}»`)}
+    <p>Alle med lenkja kan sjå lista og reservere det dei vil kjøpe. Du får ikkje sjå kva som er reservert – så det blir ei overrasking.</p>
+    <div class="lenkjeboks"><input type="text" readonly value="${esc(lenkje)}" aria-label="Delelenkje" id="delfelt"><button class="knapp hoved" data-act="kopier" data-tekst="${esc(lenkje)}">Kopier</button></div>
+    <div class="ark-knappar">
+      ${navigator.share ? `<button class="knapp heil" data-act="delSystem" data-tekst="${esc(lenkje)}" data-namn="${esc(l.namn)}">${IK.del}Send med ein app</button>` : ''}
+      <a class="knapp heil" href="#/d/${esc(l.delid)}">Sjå lista slik andre ser ho</a>
+    </div>`);
+}
+
+// ---------- Ønske: ny / endre ----------
+function arkTing(liste, t, forh) {
+  const ny = !t;
+  t = t || { tittel: '', url: '', bilete: '', pris: null, valuta: '', butikk: '', notat: '', antal: 1, favoritt: false, ...(forh || {}) };
+  const L = etterPos(S.lister);
+  const sist = localStorage.getItem(LS.sist);
+  const valt = liste ? liste.id : (L.find(x => x.id === sist) || L[0] || {}).id;
+  const listeval = (!liste || (!ny && L.length > 1))
+    ? `<label class="felt"><span>Liste</span><select name="liste">${L.map(x => `<option value="${esc(x.id)}" ${x.id === valt ? 'selected' : ''}>${esc(x.namn)}</option>`).join('')}${L.length ? '' : `<option value="__ny" selected>Ny liste: Ønskjelista mi</option>`}</select></label>`
+    : '';
+  opneArk(`${arkHovud(ny ? 'Nytt ønske' : 'Endre ønsket')}
+  <form data-skjema="ting" data-liste="${liste ? esc(liste.id) : ''}" data-ting="${ny ? '' : esc(t.id)}" data-valuta="${esc(t.valuta || '')}">
+    <label class="felt"><span>Lenkje til produktet</span>
+      <div class="lim-rad"><input type="url" name="url" value="${esc(t.url)}" placeholder="Lim inn frå nettbutikken" inputmode="url" autocomplete="off"><button type="button" class="knapp" data-act="limInnTing">${IK.lim}Lim inn</button></div>
+    </label>
+    <p class="fv-melding" aria-live="polite"></p>
+    <div class="skjema-bilde">${bilde(t)}<span class="dempa" style="font-size:14px">Biletet blir vist i lista.</span></div>
+    <label class="felt"><span>Kva ønskjer du deg?</span><input type="text" name="tittel" value="${esc(t.tittel)}" maxlength="200" placeholder="AirPods Pro" required ${ny && !forh ? '' : ''}></label>
+    <div class="to-felt">
+      <label class="felt"><span>Pris</span><input type="text" name="pris" value="${esc(prisTekst(t.pris))}" inputmode="decimal" placeholder="kr" autocomplete="off"></label>
+      <label class="felt"><span>Tal på</span><input type="number" name="antal" value="${t.antal || 1}" min="1" max="99" inputmode="numeric"></label>
+    </div>
+    <label class="felt"><span>Notat</span><textarea name="notat" maxlength="500" rows="2" placeholder="Storleik, farge, modell">${esc(t.notat)}</textarea></label>
+    <label class="sjekk"><input type="checkbox" name="favoritt" ${t.favoritt ? 'checked' : ''}><span>Mest ønskt</span></label>
+    ${listeval}
+    <details class="fleire"><summary>Bilete og butikk</summary>
+      <label class="felt"><span>Lenkje til bilete</span><input type="url" name="bilete" value="${esc(t.bilete)}" placeholder="https://…" autocomplete="off"></label>
+      <label class="felt"><span>Butikk</span><input type="text" name="butikk" value="${esc(t.butikk)}" maxlength="60" placeholder="komplett.no"></label>
+    </details>
+    <p class="feilmelding" aria-live="polite"></p>
+    <div class="ark-knappar"><button class="knapp hoved heil">${ny ? 'Legg til ønsket' : 'Lagre'}</button></div>
+  </form>`);
+  const f = $('#ark form');
+  oppdaterSkjemaBilde(f);
+  if (ny && !forh) setTimeout(() => f.url.focus({ preventScroll: true }), 40);
+}
+
+function oppdaterSkjemaBilde(f) {
+  const boks = f.querySelector('.skjema-bilde');
+  const url = f.bilete.value.trim();
+  boks.classList.toggle('vis', !!url);
+  if (url) boks.firstElementChild.outerHTML = bilde({ tittel: f.tittel.value, bilete: url });
+}
+
+async function tingHent(f) {
+  const url = f.url.value.trim();
+  if (!/^https?:\/\/\S+\.\S+/i.test(url) || f.dataset.henta === url) return;
+  f.dataset.henta = url;
+  const m = f.querySelector('.fv-melding');
+  m.className = 'fv-melding lastar';
+  m.textContent = 'Hentar namn, bilete og pris …';
+  try {
+    await sikreKonto();
+    const d = await api('/forhandsvis?url=' + encodeURIComponent(url));
+    if (!document.contains(f)) return;
+    fyllTing(f, d);
+    m.className = 'fv-melding ' + (d.delvis ? 'feil' : 'ok');
+    m.textContent = d.delvis ? d.melding : `Henta frå ${d.butikk}. Sjekk at det stemmer.`;
+  } catch (e) {
+    if (!document.contains(f)) return;
+    m.className = 'fv-melding feil';
+    m.textContent = e.message;
+    f.dataset.henta = '';
+  }
+}
+function fyllTing(f, d) {
+  const sett = (namn, v) => {
+    const el = f.elements[namn];
+    if (!el || v == null || v === '') return;
+    if (!el.value.trim() || el.dataset.auto) { el.value = v; el.dataset.auto = '1'; }
+  };
+  sett('tittel', d.tittel);
+  sett('pris', prisTekst(d.pris));
+  sett('bilete', d.bilete);
+  sett('butikk', d.butikk);
+  if (d.pris != null) f.dataset.valuta = d.valuta || 'NOK';
+  oppdaterSkjemaBilde(f);
+}
+
+// ---------- Vis eitt ønske ----------
+function arkVisTing(t, o) {
+  const pj = prisjakt(t.tittel);
+  let res = '';
+  if (o.ri) res = `<div style="margin-top:14px">${resHtml(t, o.ri).replace('class="rad-res"', 'class="rad-res" style="padding:0"')}</div>`;
+  opneArk(`${arkHovud(esc(t.tittel))}
+    ${t.bilete ? `<div class="tv-bilde"><img src="${esc(t.bilete)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>` : ''}
+    <p class="tv-meta">${t.pris != null ? `<b>${kr(t.pris, t.valuta)}</b>` : ''}${t.butikk ? `<span>${esc(t.butikk)}</span>` : ''}${t.antal > 1 ? `<span>Ønskjer ${t.antal} stk.</span>` : ''}${t.favoritt ? `<span class="fav" style="margin:0">${IK.hjarte} Mest ønskt</span>` : ''}</p>
+    ${t.notat ? `<p class="tv-notat">${esc(t.notat)}</p>` : ''}
+    ${res}
+    <div class="ark-knappar">
+      ${t.url ? `<a class="knapp hoved heil" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">${IK.ut}Opne i butikken</a>` : ''}
+      <a class="knapp heil" href="${esc(pj)}" target="_blank" rel="noopener">${IK.sok}Samanlikn prisar på Prisjakt</a>
+      ${o.eigar ? `<div class="rad2">
+          <button class="knapp" data-act="endreTing" data-liste="${esc(o.lid)}" data-ting="${esc(t.id)}">${IK.penn}Endre</button>
+          <button class="knapp" data-act="flyttOvst" data-liste="${esc(o.lid)}" data-ting="${esc(t.id)}" ${o.forst ? 'disabled' : ''}>Flytt øvst</button>
+        </div>
+        <button class="knapp fare heil" data-act="slettTing" data-liste="${esc(o.lid)}" data-ting="${esc(t.id)}">Slett ønsket</button>` : ''}
+    </div>`);
+}
+
+// ---------- Reserver ----------
+function arkReserver(delid, t, ri) {
+  const namn = localStorage.getItem(LS.mittnamn) || S.namn || '';
+  opneArk(`${arkHovud('Eg kjøper denne')}
+    <p><b>${esc(t.tittel)}</b></p>
+    <form data-skjema="reserver" data-delid="${esc(delid)}" data-ting="${esc(t.id)}">
+      <label class="felt"><span>Namnet ditt</span><input type="text" name="namn" value="${esc(namn)}" maxlength="40" placeholder="Mormor" required autocomplete="given-name" ${namn ? '' : 'autofocus'}>
+        <small>Dei andre som ser lista, ser at du har reservert. Den som eig lista, ser det ikkje.</small></label>
+      ${ri.att > 1 ? `<label class="felt"><span>Kor mange kjøper du?</span><input type="number" name="antal" value="1" min="1" max="${ri.att}" inputmode="numeric"></label>` : ''}
+      <p class="feilmelding" aria-live="polite"></p>
+      <div class="ark-knappar"><button class="knapp farge heil" style="--lf:${farge(S.delt[delid]?.data?.liste?.farge)}" ${namn ? 'autofocus' : ''}>Reserver</button></div>
+    </form>`);
+}
+
+// ---------- Konto ----------
+function arkKonto(modus) {
+  if (modus === 'gloymt') {
+    opneArk(`${arkHovud('Gløymt passord')}
+      <p>Skriv brukarnamnet og gjenopprettingskoden du fekk då du laga kontoen. Då kan du velje nytt passord.</p>
+      <form data-skjema="gloymt">
+        <label class="felt"><span>Brukarnamn</span><input type="text" name="namn" autocomplete="username" autocapitalize="none" required autofocus></label>
+        <label class="felt"><span>Gjenopprettingskode</span><input type="text" name="kode" placeholder="ABCD-EFGH-JKLM-NPQR" autocapitalize="characters" autocomplete="off" required></label>
+        <label class="felt"><span>Nytt passord</span><input type="password" name="passord" autocomplete="new-password" minlength="6" required></label>
+        <p class="feilmelding" aria-live="polite"></p>
+        <div class="ark-knappar"><button class="knapp hoved heil">Lagre nytt passord</button><button type="button" class="knapp heil" data-act="konto">Tilbake</button></div>
+      </form>`);
+    return;
+  }
+  if (modus === 'inn' || (!S.token && !modus)) {
+    const harLister = S.token && !S.namn && S.lister.length;
+    opneArk(`${arkHovud('Logg inn')}
+      <p>${harLister ? `Listene på denne eininga blir flytta inn i kontoen du loggar inn på.` : 'Du treng ikkje konto for å lage lister. Har du ein frå før, loggar du inn her.'}</p>
+      <form data-skjema="loggInn">
+        <label class="felt"><span>Brukarnamn</span><input type="text" name="namn" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus></label>
+        <label class="felt"><span>Passord</span><input type="password" name="passord" autocomplete="current-password" required></label>
+        <p class="feilmelding" aria-live="polite"></p>
+        <div class="ark-knappar"><button class="knapp hoved heil">Logg inn</button><button type="button" class="knapp heil" data-act="gloymt">Gløymt passord?</button></div>
+      </form>`);
+    return;
+  }
+  if (!S.namn) {
+    opneArk(`${arkHovud('Ta vare på listene')}
+      <p>No er listene berre knytte til denne eininga. Vel brukarnamn og passord, så kan du opne dei på mobil og PC – og dei er trygge om du byter telefon.</p>
+      <form data-skjema="settNamn">
+        <label class="felt"><span>Brukarnamn</span><input type="text" name="namn" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="kari.n" required autofocus><small>3–30 teikn: bokstavar, tal, punktum eller bindestrek.</small></label>
+        <label class="felt"><span>Passord</span><input type="password" name="passord" autocomplete="new-password" minlength="6" required><small>Minst 6 teikn.</small></label>
+        <p class="feilmelding" aria-live="polite"></p>
+        <div class="ark-knappar"><button class="knapp hoved heil">Lagre</button></div>
+      </form>
+      <p class="dempa" style="margin-top:18px">Har du konto alt? <button class="lenkjeknapp" data-act="loggInnArk">Logg inn</button></p>`);
+    return;
+  }
+  opneArk(`${arkHovud('Kontoen din')}
+    <p>Du er logga inn som <b>${esc(S.namn)}</b>. Listene er tilgjengelege på alle einingar der du loggar inn.</p>
+    <form data-skjema="bytPassord">
+      <label class="felt"><span>Nytt passord</span><input type="password" name="passord" autocomplete="new-password" minlength="6" required><small>Andre einingar blir logga ut.</small></label>
+      <p class="feilmelding" aria-live="polite"></p>
+      <div class="ark-knappar"><button class="knapp heil">Byt passord</button></div>
+    </form>
+    <div class="ark-knappar">
+      <button class="knapp heil" data-act="nyKode">Lag ny gjenopprettingskode</button>
+      <button class="knapp hoved heil" data-act="loggUt">Logg ut</button>
+      <button class="knapp fare heil" data-act="slettKonto">Slett kontoen og alle listene</button>
+    </div>`);
+}
+
+function arkKode(kode, tekst) {
+  opneArk(`${arkHovud('Gjenopprettingskoden din')}
+    <p>${tekst}</p>
+    <div class="kode">${esc(kode)}</div>
+    <p class="dempa">Ta skjermbilete eller skriv han ned. Koden blir ikkje vist igjen, men du kan lage ein ny under Konto.</p>
+    <div class="ark-knappar"><button class="knapp heil" data-act="kopier" data-tekst="${esc(kode)}">Kopier koden</button><button class="knapp hoved heil" data-act="lukk">Ferdig</button></div>`);
+}
+
+function arkStadfest(tittel, tekst, knapp, ved) {
+  opneArk(`${arkHovud(tittel)}<p>${tekst}</p>
+    <div class="ark-knappar"><button class="knapp fare heil" id="stadfest">${knapp}</button><button class="knapp heil" data-act="lukk">Avbryt</button></div>`);
+  $('#stadfest').addEventListener('click', async ev => {
+    ev.currentTarget.disabled = true;
+    try { await ved(); } catch (e) { toast(e.message); ev.currentTarget.disabled = false; }
+  });
+}
+
+// ====================================================================
+// Handlingar
+// ====================================================================
+async function limFraUtklippstavle() {
+  try {
+    const t = await navigator.clipboard.readText();
+    const m = /https?:\/\/[^\s<>"']+/i.exec(t || '');
+    if (m) return m[0];
+    toast('Fann inga lenkje i utklippstavla. Kopier lenkja til produktet først.');
+  } catch {
+    toast('Hald fingeren i feltet og vel «Lim inn».');
+  }
+  return '';
+}
+
+async function lagreRekkjefolgje(lid, ids) {
+  const l = finnListe(lid);
+  if (!l) return;
+  ids.forEach((id, i) => { const t = l.ting.find(x => x.id === id); if (t) t.pos = i + 1; });
+  lagre();
+  try {
+    await api(`/lister/${lid}/rekkjefolgje`, { metode: 'POST', data: { ids } });
+  } catch (e) {
+    toast('Fekk ikkje lagra rekkjefølgja. ' + e.message);
+  }
+}
+
+const H = {
+  lukk: () => lukkArk(),
+  konto: () => arkKonto(),
+  loggInnArk: () => arkKonto('inn'),
+  gloymt: () => arkKonto('gloymt'),
+  nyListe: () => arkListe(null),
+  endreListe: el => arkListe(finnListe(el.dataset.liste)),
+  delListe: el => { const l = finnListe(el.dataset.liste); if (l) arkDel(l); },
+  nyTing: el => arkTing(finnListe(el.dataset.liste), null),
+  anledning: el => {
+    const f = el.closest('form');
+    const valt = el.getAttribute('aria-pressed') === 'true';
+    f.querySelectorAll('[data-act=anledning]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    el.setAttribute('aria-pressed', String(!valt));
+    f.anledning.value = valt ? '' : el.dataset.k;
+    if (!valt && el.dataset.k === 'jul') {
+      if (!f.dato.value) f.dato.value = nesteJul();
+      if (!f.namn.value.trim()) f.namn.value = 'Jul ' + nesteJul().slice(0, 4);
+    } else if (!valt && !f.namn.value.trim()) {
+      f.namn.value = el.textContent.trim();
+    }
+  },
+  visning: async el => {
+    const l = finnListe(el.dataset.liste);
+    if (!l || l.visning === el.dataset.v) return;
+    l.visning = el.dataset.v;
+    lagre();
+    vis();
+    try { await api(`/lister/${l.id}`, { metode: 'PUT', data: reinListe(l) }); } catch (e) { toast(e.message); }
+  },
+  opneTing: el => {
+    const l = finnListe(rute().id);
+    const t = l && l.ting.find(x => x.id === el.dataset.ting);
+    if (t) arkVisTing(t, { eigar: true, lid: l.id, forst: etterPos(l.ting)[0] === t });
+  },
+  endreTing: el => {
+    const l = finnListe(el.dataset.liste);
+    const t = l && l.ting.find(x => x.id === el.dataset.ting);
+    if (t) arkTing(l, t);
+  },
+  flyttOvst: el => {
+    const l = finnListe(el.dataset.liste);
+    if (!l) return;
+    const ids = etterPos(l.ting).map(t => t.id).filter(id => id !== el.dataset.ting);
+    ids.unshift(el.dataset.ting);
+    lagreRekkjefolgje(l.id, ids);
+    lukkArk();
+    vis();
+    toast('Flytta øvst');
+  },
+  slettTing: el => {
+    const l = finnListe(el.dataset.liste);
+    const t = l && l.ting.find(x => x.id === el.dataset.ting);
+    if (!t) return;
+    arkStadfest('Slette ønsket?', `«${esc(t.tittel)}» blir fjerna frå lista. Har nokon reservert det, forsvinn reservasjonen òg.`, 'Slett', async () => {
+      await api(`/lister/${l.id}/ting/${t.id}`, { metode: 'DELETE' });
+      l.ting = l.ting.filter(x => x !== t);
+      lagre();
+      lukkArk();
+      vis();
+      toast('Ønsket er sletta');
+    });
+  },
+  slettListe: el => {
+    const l = finnListe(el.dataset.liste);
+    if (!l) return;
+    arkStadfest('Slette lista?', `«${esc(l.namn)}» og alle ${ønske(l.ting.length)} blir sletta. Delelenkja sluttar å verke.`, 'Slett lista', async () => {
+      await api(`/lister/${l.id}`, { metode: 'DELETE' });
+      S.lister = S.lister.filter(x => x !== l);
+      lagre();
+      lukkArk();
+      location.hash = '#/';
+      vis();
+      toast('Lista er sletta');
+    });
+  },
+  kopier: async el => {
+    const t = el.dataset.tekst;
+    try { await navigator.clipboard.writeText(t); }
+    catch {
+      const f = $('#delfelt');
+      if (f) { f.select(); document.execCommand('copy'); }
+    }
+    const før = el.textContent;
+    el.textContent = 'Kopiert';
+    setTimeout(() => { if (document.contains(el)) el.textContent = før; }, 1800);
+  },
+  delSystem: async el => {
+    try { await navigator.share({ title: el.dataset.namn, text: `Ønskjelista mi: ${el.dataset.namn}`, url: el.dataset.tekst }); } catch { /* avbrote */ }
+  },
+  ide: el => { S.finn.q = el.dataset.q; vis(); },
+  ut: () => { S.finn.ute = true; },
+  limInnFinn: async () => {
+    const u = await limFraUtklippstavle();
+    if (u) { $('#limboks input').value = u; finnHent(u); }
+    else $('#limboks input').focus();
+  },
+  limInnTing: async el => {
+    const f = el.closest('form');
+    const u = await limFraUtklippstavle();
+    if (u) { f.url.value = u; tingHent(f); }
+    else f.url.focus();
+  },
+  leggTilFunne: () => {
+    const d = S.finn.fv;
+    if (!d) return;
+    arkTing(null, null, { url: d.url, tittel: d.tittel, bilete: d.bilete, pris: d.pris, valuta: d.valuta, butikk: d.butikk });
+  },
+  opneDeltTing: el => {
+    const r = rute();
+    const d = S.delt[r.delid]?.data;
+    const t = d && d.ting.find(x => x.id === el.dataset.ting);
+    if (t) arkVisTing(t, { eigar: false, ri: d.eigar ? null : resInfo(t, d.reservert) });
+  },
+  reserver: el => {
+    const r = rute();
+    const d = S.delt[r.delid]?.data;
+    const t = d && d.ting.find(x => x.id === el.dataset.ting);
+    if (t) arkReserver(r.delid, t, resInfo(t, d.reservert));
+  },
+  angre: async el => {
+    const id = el.dataset.res;
+    const info = S.res[id];
+    if (!info) return;
+    el.disabled = true;
+    try {
+      await api(`/reservasjon/${id}/angre`, { metode: 'POST', data: { nokkel: info.nokkel } });
+      delete S.res[id];
+      lagre();
+      const d = S.delt[info.delid]?.data;
+      if (d && d.reservert[info.ting]) d.reservert[info.ting] = d.reservert[info.ting].filter(x => x.id !== id);
+      lukkArk();
+      vis();
+      toast('Reservasjonen er fjerna');
+      hentDelt(info.delid, true);
+    } catch (e) { toast(e.message); el.disabled = false; }
+  },
+  deltVis: el => { const v = S.deltVis[el.dataset.delid] ||= {}; v.v = el.dataset.v; vis(); },
+  deltSort: el => { const v = S.deltVis[el.dataset.delid] ||= {}; v.sort = el.dataset.s; vis(); },
+  prøvDelt: el => { delete S.delt[el.dataset.delid]; vis(); },
+  fjernFolgd: el => {
+    const delid = el.dataset.delid;
+    S.folgjer = S.folgjer.filter(f => f.delid !== delid);
+    lagre();
+    vis();
+    if (S.token) api(`/folgjer/${delid}`, { metode: 'DELETE' }).catch(() => {});
+  },
+  loggUt: async () => {
+    try { await api('/logg-ut', { metode: 'POST', data: {} }); } catch { /* logg ut lokalt likevel */ }
+    loggUtLokalt();
+    lukkArk();
+    location.hash = '#/';
+    vis();
+    toast('Du er logga ut');
+  },
+  nyKode: async el => {
+    el.disabled = true;
+    try { const d = await api('/gjenopprettingskode', { metode: 'POST', data: {} }); arkKode(d.kode, 'Den gamle koden verkar ikkje lenger.'); }
+    catch (e) { toast(e.message); el.disabled = false; }
+  },
+  slettKonto: () => arkStadfest('Slette kontoen?', 'Alle listene dine og ønska i dei blir sletta for godt, og delelenkjene sluttar å verke.', 'Slett alt', async () => {
+    await api('/konto', { metode: 'DELETE' });
+    loggUtLokalt();
+    lukkArk();
+    location.hash = '#/';
+    vis();
+    toast('Kontoen er sletta');
+  }),
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const f = H[el.dataset.act];
+  if (f) {
+    if (el.tagName === 'BUTTON' && el.type !== 'submit') e.preventDefault();
+    f(el, e);
+  }
+});
+
+// ---------- Skjema ----------
+const SK = {
+  sok: f => {
+    S.finn.q = f.q.value.trim();
+    vis();
+    if (S.finn.q) setTimeout(() => $('.pj')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 30);
+  },
+  lim: f => finnHent(f.url.value),
+  opneLenkje: f => {
+    const m = /#\/d\/([A-Za-z0-9]{12})/.exec(f.lenkje.value) || /^([A-Za-z0-9]{12})$/.exec(f.lenkje.value.trim());
+    if (!m) { f.querySelector('.feilmelding').textContent = 'Fann ingen ønskjeliste i den lenkja.'; return; }
+    location.hash = '#/d/' + m[1];
+  },
+  liste: async (f, knapp) => {
+    const id = f.dataset.liste;
+    const l = id ? finnListe(id) : { id: lagId(), ting: [], visning: 'rangert' };
+    const ny = { ...l, namn: f.namn.value.trim(), dato: f.dato.value, skildring: f.skildring.value.trim(), anledning: f.anledning.value, farge: f.farge.value || 'bringebaer' };
+    if (!ny.namn) throw new Error('Gi lista eit namn.');
+    if (id) {
+      await api(`/lister/${id}`, { metode: 'PUT', data: reinListe(ny) });
+      Object.assign(l, ny);
+      lagre();
+      lukkArk();
+      vis();
+    } else {
+      await lagreListe(ny);
+      lukkArk();
+      location.hash = '#/l/' + ny.id;
+    }
+  },
+  ting: async f => {
+    const tid = f.dataset.ting;
+    let lid = f.elements.liste ? f.elements.liste.value : f.dataset.liste;
+    const tittel = f.tittel.value.trim();
+    if (!tittel) throw new Error('Skriv kva du ønskjer deg.');
+    const prisRaa = f.pris.value.trim();
+    const pris = tolkPris(prisRaa);
+    if (prisRaa && pris == null) throw new Error('Prisen må vere eit tal, til dømes 499 eller 1 299,90.');
+    if (lid === '__ny' || !lid) {
+      const l = await lagreListe({ id: lagId(), namn: 'Ønskjelista mi', farge: 'bringebaer', anledning: '', dato: '', skildring: '', visning: 'rangert', ting: [] });
+      lid = l.id;
+    }
+    const liste = finnListe(lid);
+    const gammal = tid ? S.lister.flatMap(l => l.ting).find(x => x.id === tid) : null;
+    const t = {
+      ...(gammal || {}), id: tid || lagId(), tittel, pris, valuta: pris == null ? '' : (f.dataset.valuta || 'NOK'),
+      antal: Math.max(1, Math.min(99, parseInt(f.antal.value, 10) || 1)), notat: f.notat.value.trim(), favoritt: f.favoritt.checked,
+      url: f.url.value.trim(), bilete: f.bilete.value.trim(), butikk: f.butikk.value.trim(),
+    };
+    if (t.url && !/^https?:\/\//i.test(t.url)) t.url = 'https://' + t.url;
+    if (t.url && !t.butikk) { try { t.butikk = new URL(t.url).hostname.replace(/^www\./, ''); } catch { /* ugyldig */ } }
+    const d = await api(`/lister/${lid}/ting/${t.id}`, { metode: 'PUT', data: reinTing(t) });
+    for (const l of S.lister) l.ting = l.ting.filter(x => x.id !== t.id);
+    if (d.pos != null) t.pos = d.pos;
+    liste.ting.push(t);
+    localStorage.setItem(LS.sist, lid);
+    lagre();
+    lukkArk();
+    const r = rute();
+    if (!tid && r.side === 'finn') {
+      S.finn.fv = null;
+      S.finn.lim = '';
+      visLimBoks();
+      toast(`Lagt til i «${liste.namn}»`);
+    } else if (r.side === 'liste' && r.id !== lid) {
+      vis();
+      toast(`Flytta til «${liste.namn}»`);
+    } else if (r.side !== 'liste') {
+      location.hash = '#/l/' + lid;
+    } else {
+      vis();
+      if (!tid) toast('Ønsket er lagt til');
+    }
+  },
+  reserver: async f => {
+    const namn = f.namn.value.trim();
+    if (!namn) throw new Error('Skriv namnet ditt.');
+    const delid = f.dataset.delid;
+    const tid = f.dataset.ting;
+    const antal = f.antal ? parseInt(f.antal.value, 10) || 1 : 1;
+    const d = await api(`/del/${delid}/reserver`, { metode: 'POST', data: { ting: tid, namn, antal } });
+    localStorage.setItem(LS.mittnamn, namn);
+    S.res[d.id] = { nokkel: d.nokkel, delid, ting: tid };
+    lagre();
+    const data = S.delt[delid]?.data;
+    if (data) (data.reservert[tid] ||= []).push({ id: d.id, namn: d.namn, antal: d.antal });
+    lukkArk();
+    vis();
+    toast('Reservert. Berre du og dei andre gjestane ser det.');
+    hentDelt(delid, true);
+  },
+  loggInn: async f => {
+    const d = await api('/logg-inn', { metode: 'POST', data: { namn: f.namn.value, passord: f.passord.value, anon: S.token && !S.namn ? S.token : undefined } });
+    S.token = d.token;
+    S.namn = d.namn;
+    lagre();
+    lukkArk();
+    toast(`Logga inn som ${d.namn}`);
+    S.lasta = false;
+    vis();
+    await hentMeg();
+  },
+  settNamn: async f => {
+    const d = await api('/konto/namn', { metode: 'POST', data: { namn: f.namn.value, passord: f.passord.value } });
+    S.namn = d.namn;
+    lagre();
+    vis();
+    arkKode(d.kode, `Brukarnamnet ditt er <b>${esc(d.namn)}</b>. Gløymer du passordet, kan du lage nytt med denne koden.`);
+  },
+  bytPassord: async f => {
+    await api('/passord', { metode: 'POST', data: { passord: f.passord.value } });
+    f.reset();
+    toast('Passordet er bytt');
+  },
+  gloymt: async f => {
+    const d = await api('/nytt-passord', { metode: 'POST', data: { namn: f.namn.value, kode: f.kode.value, passord: f.passord.value } });
+    S.token = d.token;
+    S.namn = d.namn;
+    lagre();
+    S.lasta = false;
+    vis();
+    hentMeg();
+    arkKode(d.kode, 'Passordet er bytt, og du er logga inn. Her er ein ny gjenopprettingskode – den gamle er brukt opp.');
+  },
+};
+
+document.addEventListener('submit', async e => {
+  const f = e.target.closest('form[data-skjema]');
+  if (!f) return;
+  e.preventDefault();
+  const fn = SK[f.dataset.skjema];
+  if (!fn) return;
+  const knapp = f.querySelector('button:not([type=button])');
+  const feil = f.querySelector('.feilmelding');
+  if (feil) feil.textContent = '';
+  if (knapp) knapp.disabled = true;
+  try {
+    await fn(f, knapp);
+  } catch (err) {
+    if (feil && document.contains(feil)) feil.textContent = err.message;
+    else toast(err.message);
+  } finally {
+    if (knapp && document.contains(knapp)) knapp.disabled = false;
+  }
+});
+
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.auto) delete el.dataset.auto;
+  const f = el.form;
+  if (f && f.dataset.skjema === 'ting' && el.name === 'bilete') oppdaterSkjemaBilde(f);
+});
+document.addEventListener('paste', e => {
+  const el = e.target;
+  if (!el.form) return;
+  if (el.form.dataset.skjema === 'ting' && el.name === 'url') setTimeout(() => tingHent(el.form), 0);
+  if (el.form.dataset.skjema === 'lim' && el.name === 'url') setTimeout(() => finnHent(el.value), 0);
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.form && el.form.dataset.skjema === 'ting' && el.name === 'url') tingHent(el.form);
+});
+
+// Kjem tilbake frå ein butikk: vis kvar lenkja skal limast inn.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (S.finn.ute && rute().side === 'finn') {
+    S.finn.ute = false;
+    const b = $('#limboks');
+    if (b) {
+      b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      b.classList.remove('blink');
+      void b.offsetWidth;
+      b.classList.add('blink');
+    }
+  }
+  const r = rute();
+  if (r.side === 'deltliste' && S.delt[r.delid]?.data) hentDelt(r.delid, true);
+});
+
+// ---------- Dra for å endre rekkjefølgja ----------
+function nummerer(ol) {
+  [...ol.children].forEach((li, i) => {
+    const r = li.querySelector('.rang');
+    r.textContent = i + 1;
+    r.setAttribute('aria-label', `Nummer ${i + 1}`);
+  });
+}
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest('[data-drag]');
+  if (!h || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const li = h.closest('.rad');
+  const ol = li.parentElement;
+  e.preventDefault();
+  try { h.setPointerCapture(e.pointerId); } catch { /* eldre nettlesar */ }
+  const start = [...ol.children].map(x => x.dataset.ting).join();
+  const y0 = e.clientY;
+  let y = y0;
+  let aktiv = false;
+  let raf = 0;
+  // Raden som blir dregen, blir aldri teken ut av sida (då misser han fingeren) – det er naboane som byter plass.
+  const sjekk = () => {
+    let n;
+    while ((n = li.nextElementSibling) && y > n.getBoundingClientRect().top + n.offsetHeight / 2) { ol.insertBefore(n, li); nummerer(ol); }
+    while ((n = li.previousElementSibling) && y < n.getBoundingClientRect().top + n.offsetHeight / 2) { ol.insertBefore(n, li.nextElementSibling); nummerer(ol); }
+  };
+  const rull = () => {
+    if (aktiv) {
+      const kant = 110;
+      const botn = innerHeight - (innerWidth < 860 ? 150 : 40);
+      if (y < kant) scrollBy(0, -Math.ceil((kant - y) / 7));
+      else if (y > botn) scrollBy(0, Math.ceil((y - botn) / 7));
+      sjekk();
+    }
+    raf = requestAnimationFrame(rull);
+  };
+  const flytt = ev => {
+    y = ev.clientY;
+    if (!aktiv && Math.abs(y - y0) > 4) { aktiv = true; li.classList.add('drar'); ol.classList.add('drarliste'); }
+    if (aktiv) sjekk();
+  };
+  const slutt = ev => {
+    if (ev.pointerId !== e.pointerId) return;
+    cancelAnimationFrame(raf);
+    window.removeEventListener('pointermove', flytt);
+    window.removeEventListener('pointerup', slutt);
+    window.removeEventListener('pointercancel', slutt);
+    li.classList.remove('drar');
+    ol.classList.remove('drarliste');
+    const ids = [...ol.children].map(x => x.dataset.ting);
+    if (ids.join() !== start) lagreRekkjefolgje(ol.dataset.liste, ids);
+  };
+  window.addEventListener('pointermove', flytt);
+  window.addEventListener('pointerup', slutt);
+  window.addEventListener('pointercancel', slutt);
+  raf = requestAnimationFrame(rull);
+});
+let tastTid;
+document.addEventListener('keydown', e => {
+  const h = e.target.closest && e.target.closest('[data-drag]');
+  if (!h || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  e.preventDefault();
+  const li = h.closest('.rad');
+  const ol = li.parentElement;
+  if (e.key === 'ArrowUp' && li.previousElementSibling) ol.insertBefore(li.previousElementSibling, li.nextElementSibling);
+  else if (e.key === 'ArrowDown' && li.nextElementSibling) ol.insertBefore(li.nextElementSibling, li);
+  else return;
+  nummerer(ol);
+  h.focus();
+  clearTimeout(tastTid);
+  tastTid = setTimeout(() => lagreRekkjefolgje(ol.dataset.liste, [...ol.children].map(x => x.dataset.ting)), 600);
+});
+
+// ---------- Start ----------
+(function start() {
+  // Deling frå andre appar (Android) eller ?leggtil=lenkje (snarveg på iPhone)
+  const p = new URLSearchParams(location.search);
+  const inn = [p.get('leggtil'), p.get('url'), p.get('text'), p.get('title')].filter(Boolean).join(' ');
+  const m = /https?:\/\/[^\s<>"']+/i.exec(inn);
+  if (m || p.has('leggtil')) {
+    history.replaceState(null, '', location.pathname + '#/finn');
+    if (m) setTimeout(() => finnHent(m[0]), 0);
+  }
+  vis();
+  hentMeg();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
