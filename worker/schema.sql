@@ -68,6 +68,16 @@ CREATE TABLE IF NOT EXISTS reservasjonar (
 CREATE INDEX IF NOT EXISTS res_liste ON reservasjonar (liste);
 CREATE INDEX IF NOT EXISTS res_ting ON reservasjonar (ting);
 
+-- Bilete brukaren har lima inn eller valt sjølv (når butikken ikkje gir bilete). Skalert ned i appen før opplasting.
+CREATE TABLE IF NOT EXISTS bilete (
+  id TEXT PRIMARY KEY,
+  brukar TEXT NOT NULL,
+  type TEXT NOT NULL,
+  data BLOB NOT NULL,
+  laga INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS bilete_brukar ON bilete (brukar);
+
 -- Lister som er delte med ein brukar (opna via lenkje).
 CREATE TABLE IF NOT EXISTS folgjer (
   brukar TEXT NOT NULL,

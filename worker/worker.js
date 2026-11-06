@@ -62,6 +62,8 @@ async function rute(req, env, url) {
   if (m === 'POST' && p === '/logg-inn') return loggInn(req, env);
   if (m === 'POST' && p === '/nytt-passord') return nyttPassordMedKode(req, env);
 
+  if (m === 'GET' && (r = /^\/bilete\/([0-9a-f]{32})$/.exec(p))) return hentBilete(env, r[1]);
+
   // Offentleg: delte lister og reservasjonar
   if (m === 'GET' && (r = new RegExp(`^/del/(${DELID})$`).exec(p))) return hentDelt(req, env, r[1]);
   if (m === 'POST' && (r = new RegExp(`^/del/(${DELID})/reserver$`).exec(p))) return reserver(req, env, r[1]);
@@ -81,6 +83,7 @@ async function rute(req, env, url) {
   }
   if (m === 'DELETE' && p === '/konto') return slettKonto(env, b);
   if (m === 'GET' && p === '/forhandsvis') return forhandsvis(env, b, url);
+  if (m === 'POST' && p === '/bilete') return lastOppBilete(req, env, b, url);
   if (m === 'POST' && p === '/rekkjefolgje') return sorterLister(req, env, b);
   if (m === 'POST' && p === '/folgjer') return folg(req, env, b);
   if (m === 'DELETE' && (r = new RegExp(`^/folgjer/(${DELID})$`).exec(p))) {
@@ -181,6 +184,7 @@ async function flett(env, anonToken, til) {
     env.DB.prepare('UPDATE lister SET brukar = ?, pos = pos - ? WHERE brukar = ?').bind(til, fra0.p - til0.p + 1, fra),
     env.DB.prepare('INSERT OR IGNORE INTO folgjer (brukar, delid, laga) SELECT ?, delid, laga FROM folgjer WHERE brukar = ?').bind(til, fra),
     env.DB.prepare('DELETE FROM folgjer WHERE brukar = ?').bind(fra),
+    env.DB.prepare('UPDATE bilete SET brukar = ? WHERE brukar = ?').bind(til, fra),
     env.DB.prepare('DELETE FROM okter WHERE brukar = ?').bind(fra),
     env.DB.prepare('DELETE FROM brukarar WHERE id = ?').bind(fra),
   ]);
@@ -244,6 +248,7 @@ async function slettKonto(env, b) {
     env.DB.prepare(`DELETE FROM ting WHERE liste IN (${sub})`).bind(b.id),
     env.DB.prepare('DELETE FROM lister WHERE brukar = ?').bind(b.id),
     env.DB.prepare('DELETE FROM folgjer WHERE brukar = ?').bind(b.id),
+    env.DB.prepare('DELETE FROM bilete WHERE brukar = ?').bind(b.id),
     env.DB.prepare('DELETE FROM gjenoppretting WHERE brukar = ?').bind(b.id),
     env.DB.prepare('DELETE FROM okter WHERE brukar = ?').bind(b.id),
     env.DB.prepare('DELETE FROM brukarar WHERE id = ?').bind(b.id),
@@ -338,6 +343,7 @@ async function slettListe(env, b, id) {
     env.DB.prepare('DELETE FROM ting WHERE liste = ?').bind(id),
     env.DB.prepare('DELETE FROM lister WHERE id = ?').bind(id),
   ]);
+  await ryddBilete(env, b.id);
   return svar({ ok: true });
 }
 
@@ -430,6 +436,7 @@ async function slettTing(env, b, lid, tid) {
     env.DB.prepare('DELETE FROM reservasjonar WHERE ting = ? AND liste = ?').bind(tid, lid),
     env.DB.prepare('DELETE FROM ting WHERE id = ? AND liste = ?').bind(tid, lid),
   ]);
+  await ryddBilete(env, b.id);
   return svar({ ok: true });
 }
 
@@ -492,6 +499,55 @@ async function folg(req, env, b) {
   await env.DB.prepare('DELETE FROM folgjer WHERE brukar = ? AND delid NOT IN (SELECT delid FROM folgjer WHERE brukar = ? ORDER BY laga DESC LIMIT ?)')
     .bind(b.id, b.id, MAKS_FOLGJER).run();
   return svar({ ok: true });
+}
+
+// ---------- Eigne bilete ----------
+// Appen skalerer biletet ned (maks 900 px) før opplasting, så det held med ei lita grense her.
+const MAKS_BILETE = 400;
+const MAKS_BILETE_BYTES = 700000;
+const BILETTYPAR = {
+  'image/jpeg': b => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  'image/png': b => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
+  'image/webp': b => b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45,
+};
+
+async function lastOppBilete(req, env, b, url) {
+  await grense(env, 'bilete:' + b.id);
+  const buf = new Uint8Array(await req.arrayBuffer());
+  if (!buf.length) throw new Feil(400, 'Biletet er tomt.');
+  if (buf.length > MAKS_BILETE_BYTES) throw new Feil(413, 'Biletet er for stort.');
+  const type = Object.keys(BILETTYPAR).find(t => BILETTYPAR[t](buf));
+  if (!type) throw new Feil(415, 'Berre JPEG-, PNG- og WebP-bilete er lov.');
+  await ryddBilete(env, b.id);
+  const { n } = await env.DB.prepare('SELECT COUNT(*) AS n FROM bilete WHERE brukar = ?').bind(b.id).first();
+  if (n >= MAKS_BILETE) throw new Feil(409, `Du kan ha opptil ${MAKS_BILETE} eigne bilete. Slett nokre gamle ønske først.`);
+  const id = hex(tilfeldig(16));
+  await env.DB.prepare('INSERT INTO bilete (id, brukar, type, data, laga) VALUES (?, ?, ?, ?, ?)').bind(id, b.id, type, buf, Date.now()).run();
+  return svar({ id, url: `${url.origin}/bilete/${id}` }, 201);
+}
+
+async function hentBilete(env, id) {
+  const rad = await env.DB.prepare('SELECT type, data FROM bilete WHERE id = ?').bind(id).first();
+  if (!rad) return new Response('Fann ikkje biletet.', { status: 404 });
+  const data = rad.data instanceof ArrayBuffer ? rad.data : new Uint8Array(rad.data);
+  return new Response(data, {
+    headers: {
+      'Content-Type': rad.type,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "default-src 'none'",
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}
+
+// Slett eigne bilete som ingen ønske brukar lenger (og som er meir enn ein time gamle,
+// så eit bilete i eit skjema som ikkje er lagra enno, får vere i fred).
+async function ryddBilete(env, brukar) {
+  await env.DB.prepare(`DELETE FROM bilete WHERE brukar = ? AND laga < ? AND id NOT IN (
+      SELECT substr(json_extract(t.data, '$.bilete'), -32) FROM ting t JOIN lister l ON l.id = t.liste
+      WHERE l.brukar = ? AND json_extract(t.data, '$.bilete') LIKE '%/bilete/%')`)
+    .bind(brukar, Date.now() - 3600e3, brukar).run();
 }
 
 // ---------- Hent namn, bilete og pris frå ei produktlenkje ----------
@@ -573,9 +629,37 @@ function namnFraLenkje(u) {
 async function lesSide(res) {
   const meta = {};
   const ld = [];
+  const lenkjebilete = [];
+  const bilete = [];
   let tittel = '';
   let iLd = false;
+  const forsteSrcset = s => {
+    // Vel det største biletet i srcset («a.jpg 400w, b.jpg 800w»).
+    const val = String(s || '').split(',').map(x => x.trim().split(/\s+/)).filter(x => x[0]);
+    if (!val.length) return '';
+    val.sort((a, b) => (parseFloat(b[1]) || 0) - (parseFloat(a[1]) || 0));
+    return val[0][0];
+  };
   const rw = new HTMLRewriter()
+    .on('link', {
+      element(e) {
+        const rel = (e.getAttribute('rel') || '').toLowerCase();
+        if (rel.includes('image_src')) lenkjebilete.push(e.getAttribute('href') || '');
+        else if (rel.includes('preload') && (e.getAttribute('as') || '').toLowerCase() === 'image') {
+          lenkjebilete.push(forsteSrcset(e.getAttribute('imagesrcset')) || e.getAttribute('href') || '');
+        }
+      },
+    })
+    .on('img', {
+      element(e) {
+        if (bilete.length >= 60) return;
+        const src = e.getAttribute('data-src') || e.getAttribute('data-lazy-src') || e.getAttribute('data-original') || e.getAttribute('data-zoom-image')
+          || forsteSrcset(e.getAttribute('data-srcset')) || forsteSrcset(e.getAttribute('srcset')) || e.getAttribute('src') || '';
+        const b = parseInt(e.getAttribute('width'), 10);
+        const h = parseInt(e.getAttribute('height'), 10);
+        bilete.push({ src, alt: e.getAttribute('alt') || '', liten: (b > 0 && b < 120) || (h > 0 && h < 120) });
+      },
+    })
     .on('meta', {
       element(e) {
         const k = (e.getAttribute('property') || e.getAttribute('name') || e.getAttribute('itemprop') || '').toLowerCase().trim();
@@ -604,10 +688,29 @@ async function lesSide(res) {
       },
     });
   await rw.transform(res).arrayBuffer();
-  return { meta, ld, tittel };
+  return { meta, ld, tittel, lenkjebilete, bilete };
 }
 
-function tolk({ meta, ld, tittel }, sideUrl, vert) {
+// Første bilete på sida som ser ut som eit produktbilete (ikkje logo, ikon, sporingspiksel o.l.).
+// Bilete med alt-tekst som liknar produktnamnet kjem først.
+const IKKJE_PRODUKT = /logo|icon|ikon|sprite|favicon|flag|payment|betal|klarna|vipps|visa|mastercard|badge|banner|placeholder|pixel|tracking|avatar|rating|stars?[-_.]|trustpilot|spinner|loader|blank|transparent|1x1|apple-touch|social|facebook|instagram|youtube|tiktok/i;
+function forsteProduktbilete(bilete, namn, sideUrl) {
+  const ord = String(namn || '').toLowerCase().split(/[^a-zæøåäöü0-9]+/).filter(o => o.length >= 4);
+  const gode = [];
+  for (const b of bilete) {
+    let src = avkod(b.src).trim();
+    if (!src || src.startsWith('data:') || b.liten) continue;
+    try { src = new URL(src, sideUrl).toString(); } catch { continue; }
+    if (!/^https?:/.test(src) || /\.svg(\?|$)/i.test(src) || /\.gif(\?|$)/i.test(src) || IKKJE_PRODUKT.test(src) || IKKJE_PRODUKT.test(b.alt)) continue;
+    const alt = b.alt.toLowerCase();
+    gode.push({ src, treff: ord.filter(o => alt.includes(o)).length });
+  }
+  if (!gode.length) return '';
+  const best = gode.reduce((a, b) => (b.treff > a.treff ? b : a), gode[0]);
+  return best.src;
+}
+
+function tolk({ meta, ld, tittel, lenkjebilete = [], bilete: alleBilete = [] }, sideUrl, vert) {
   // JSON-LD (schema.org) er best: produktnamn, bilete og pris.
   const alle = [];
   const ga = (o, d = 0) => {
@@ -642,9 +745,12 @@ function tolk({ meta, ld, tittel }, sideUrl, vert) {
   let namn = produkt && typeof produkt.name === 'string' ? produkt.name : '';
   namn = namn || meta['og:title'] || meta['twitter:title'] || tittel;
   let bilete = produkt ? forsteBilete(produkt.image) : '';
-  bilete = bilete || meta['og:image'] || meta['og:image:url'] || meta['og:image:secure_url'] || meta['twitter:image'] || meta['twitter:image:src'] || '';
+  bilete = bilete || meta['og:image'] || meta['og:image:url'] || meta['og:image:secure_url'] || meta['twitter:image'] || meta['twitter:image:src'] || meta['image'] || '';
   try { bilete = bilete ? new URL(avkod(bilete), sideUrl).toString() : ''; } catch { bilete = ''; }
   if (!/^https?:/.test(bilete)) bilete = '';
+  // Manglar sida eit «hovudbilete» i koden, tek vi det første produktbiletet på sida.
+  if (!bilete) bilete = forsteProduktbilete(lenkjebilete.map(src => ({ src, alt: '', liten: false })), '', sideUrl);
+  if (!bilete) bilete = forsteProduktbilete(alleBilete, namn, sideUrl);
   return {
     tittel: rensTittel(namn, butikk, vert),
     bilete,

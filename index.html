@@ -9,7 +9,7 @@
 <meta property="og:description" content="Sjå ønskja og reserver det du vil gi. Den som eig lista, ser ikkje kva som er reservert.">
 <meta property="og:image" content="https://lillerud-land1.github.io/onskje/icons/icon-512.png">
 <meta name="theme-color" content="#ECEFF3">
-<meta name="onskje-versjon" content="6a7b1f2bf1c8">
+<meta name="onskje-versjon" content="f6b22f3060e9">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -304,9 +304,12 @@ details.fleire summary { cursor: pointer; font-weight: 650; color: var(--gra); p
 .fv-melding.lastar { color: var(--gra); }
 .fv-melding.ok { color: var(--ok); }
 .fv-melding.feil { color: var(--fare); }
-.skjema-bilde { display: none; margin-top: 14px; }
-.skjema-bilde.vis { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; }
-.skjema-bilde .bilde { width: 76px; height: 76px; }
+.biletval { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: center; }
+.biletval .bilde { width: 88px; height: 88px; }
+.biletval-knappar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.biletval-knappar label.knapp { cursor: pointer; position: relative; }
+.biletval-knappar label.knapp:focus-within { outline: 3px solid color-mix(in srgb, var(--lf) 55%, transparent); outline-offset: 2px; }
+.felt > small[hidden] { display: none; }
 .feilmelding { color: var(--fare); font-size: 14.5px; margin: 12px 0 0; }
 .feilmelding:empty { display: none; }
 
@@ -429,6 +432,7 @@ const IK = {
   lim: '<svg class="ik" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9.5 11h5M9.5 15h5"/></svg>',
   person: '<svg class="ik" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg>',
   pil: '<svg class="ik" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  bilete: '<svg class="ik" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 16l-5-5-8.5 8"/></svg>',
 };
 
 // ---------- Tilstand ----------
@@ -1003,8 +1007,18 @@ function arkTing(liste, t, forh) {
       <div class="lim-rad"><input type="url" name="url" value="${esc(t.url)}" placeholder="Lim inn frå nettbutikken" inputmode="url" autocomplete="off"><button type="button" class="knapp" data-act="limInnTing">${IK.lim}Lim inn</button></div>
     </label>
     <p class="fv-melding" aria-live="polite"></p>
-    <div class="skjema-bilde">${bilde(t)}<span class="dempa" style="font-size:14px">Biletet blir vist i lista.</span></div>
-    <label class="felt"><span>Kva ønskjer du deg?</span><input type="text" name="tittel" value="${esc(t.tittel)}" maxlength="200" placeholder="AirPods Pro" required ${ny && !forh ? '' : ''}></label>
+    <label class="felt"><span>Kva ønskjer du deg?</span><input type="text" name="tittel" value="${esc(t.tittel)}" maxlength="200" placeholder="AirPods Pro" required></label>
+    <div class="felt"><span>Bilete</span>
+      <div class="biletval">
+        <div class="biletval-bilde">${bilde(t)}</div>
+        <div class="biletval-knappar">
+          <button type="button" class="knapp liten" data-act="limInnBilete">${IK.lim}Lim inn bilete</button>
+          <label class="knapp liten">${IK.bilete}Vel bilete<input type="file" name="fil" accept="image/*" class="sr"></label>
+          <button type="button" class="lenkjeknapp" data-act="fjernBilete" hidden>Fjern biletet</button>
+        </div>
+      </div>
+      <small class="bilet-hint">Ikkje noko bilete? Hald fingeren på produktbiletet i butikken, vel «Kopier», og trykk «Lim inn bilete».</small>
+    </div>
     <div class="to-felt">
       <label class="felt"><span>Pris</span><input type="text" name="pris" value="${esc(prisTekst(t.pris))}" inputmode="decimal" placeholder="kr" autocomplete="off"></label>
       <label class="felt"><span>Tal på</span><input type="number" name="antal" value="${t.antal || 1}" min="1" max="99" inputmode="numeric"></label>
@@ -1012,7 +1026,7 @@ function arkTing(liste, t, forh) {
     <label class="felt"><span>Notat</span><textarea name="notat" maxlength="500" rows="2" placeholder="Storleik, farge, modell">${esc(t.notat)}</textarea></label>
     <label class="sjekk"><input type="checkbox" name="favoritt" ${t.favoritt ? 'checked' : ''}><span>Mest ønskt</span></label>
     ${listeval}
-    <details class="fleire"><summary>Bilete og butikk</summary>
+    <details class="fleire"><summary>Bilete-lenkje og butikk</summary>
       <label class="felt"><span>Lenkje til bilete</span><input type="url" name="bilete" value="${esc(t.bilete)}" placeholder="https://…" autocomplete="off"></label>
       <label class="felt"><span>Butikk</span><input type="text" name="butikk" value="${esc(t.butikk)}" maxlength="60" placeholder="komplett.no"></label>
     </details>
@@ -1025,11 +1039,66 @@ function arkTing(liste, t, forh) {
 }
 
 function oppdaterSkjemaBilde(f) {
-  const boks = f.querySelector('.skjema-bilde');
   const url = f.bilete.value.trim();
-  boks.classList.toggle('vis', !!url);
-  if (url) boks.firstElementChild.outerHTML = bilde({ tittel: f.tittel.value, bilete: url });
+  f.querySelector('.biletval-bilde').innerHTML = bilde({ tittel: f.tittel.value || '?', bilete: url });
+  f.querySelector('[data-act=fjernBilete]').hidden = !url;
+  f.querySelector('.bilet-hint').hidden = !!url;
 }
+
+// Eige bilete (lima inn eller valt): skalert ned til maks 900 px JPEG og lagra på serveren.
+async function skalerBilete(blob, maks = 900) {
+  let kjelde;
+  try {
+    kjelde = await createImageBitmap(blob);
+  } catch {
+    kjelde = await new Promise((ok, feil) => {
+      const i = new Image();
+      i.onload = () => ok(i);
+      i.onerror = () => feil(new Error('Klarte ikkje å lese biletet. Prøv eit anna.'));
+      i.src = URL.createObjectURL(blob);
+    });
+  }
+  const b = kjelde.width;
+  const h = kjelde.height;
+  if (!b || !h) throw new Error('Klarte ikkje å lese biletet. Prøv eit anna.');
+  const s = Math.min(1, maks / Math.max(b, h));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(b * s));
+  c.height = Math.max(1, Math.round(h * s));
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff';
+  x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(kjelde, 0, 0, c.width, c.height);
+  const ut = await new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.84));
+  if (!ut) throw new Error('Klarte ikkje å lage biletet. Prøv eit anna.');
+  return ut;
+}
+async function lastOppBilete(f, blob) {
+  const m = f.querySelector('.fv-melding');
+  m.className = 'fv-melding lastar';
+  m.textContent = 'Lagrar biletet …';
+  try {
+    if (blob.type && !blob.type.startsWith('image/')) throw new Error('Det er ikkje eit bilete.');
+    await sikreKonto();
+    const jpg = await skalerBilete(blob);
+    let res;
+    try {
+      res = await fetch(API + '/bilete', { method: 'POST', headers: { Authorization: 'Bearer ' + S.token, 'Content-Type': 'image/jpeg' }, body: jpg });
+    } catch { throw new Error('Fekk ikkje kontakt med serveren. Sjekk nettet og prøv igjen.'); }
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.feil || 'Klarte ikkje å lagre biletet.');
+    if (!document.contains(f)) return;
+    f.bilete.value = d.url;
+    delete f.bilete.dataset.auto;
+    oppdaterSkjemaBilde(f);
+    m.className = 'fv-melding ok';
+    m.textContent = 'Biletet er lagt til.';
+  } catch (e) {
+    m.className = 'fv-melding feil';
+    m.textContent = e.message;
+  }
+}
+const erBileteLenkje = u => /\.(jpe?g|png|webp|avif)(\?|#|$)/i.test(u) || /\/(images?|img|media|bilete|pictures?)\//i.test(u);
 
 async function tingHent(f) {
   const url = f.url.value.trim();
@@ -1044,8 +1113,7 @@ async function tingHent(f) {
     if (!document.contains(f)) return;
     fyllTing(f, d);
     m.className = 'fv-melding ' + (d.delvis ? 'feil' : 'ok');
-    m.textContent = d.delvis ? d.melding : `Henta frå ${d.butikk}. Sjekk at det stemmer.`;
-  } catch (e) {
+    m.textContent = d.delvis ? d.melding : `Henta frå ${d.butikk}. Sjekk at det stemmer.`;  } catch (e) {
     if (!document.contains(f)) return;
     m.className = 'fv-melding feil';
     m.textContent = e.message;
@@ -1300,6 +1368,38 @@ const H = {
     if (u) { $('#limboks input').value = u; finnHent(u); }
     else $('#limboks input').focus();
   },
+  limInnBilete: async el => {
+    const f = el.closest('form');
+    if (!navigator.clipboard || !navigator.clipboard.read) {
+      toast('Denne nettlesaren kan ikkje lime inn bilete. Bruk «Vel bilete».');
+      return;
+    }
+    try {
+      const ting = await navigator.clipboard.read();
+      for (const it of ting) {
+        const type = it.types.find(t => t.startsWith('image/'));
+        if (type) { await lastOppBilete(f, await it.getType(type)); return; }
+      }
+      for (const it of ting) {
+        if (!it.types.includes('text/plain')) continue;
+        const m = /https?:\/\/[^\s<>"']+/i.exec(await (await it.getType('text/plain')).text());
+        if (m && erBileteLenkje(m[0])) {
+          f.bilete.value = m[0];
+          delete f.bilete.dataset.auto;
+          oppdaterSkjemaBilde(f);
+          return;
+        }
+      }
+      toast('Fann ikkje noko bilete å lime inn. Hald fingeren på biletet i butikken og vel «Kopier» først.');
+    } catch {
+      toast('Fekk ikkje lov å lime inn. Prøv igjen, eller bruk «Vel bilete».');
+    }
+  },
+  fjernBilete: el => {
+    const f = el.closest('form');
+    f.bilete.value = '';
+    oppdaterSkjemaBilde(f);
+  },
   limInnTing: async el => {
     const f = el.closest('form');
     const u = await limFraUtklippstavle();
@@ -1540,6 +1640,14 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('paste', e => {
   const el = e.target;
+  // Bilete i utklippstavla (Ctrl+V på PC) går rett inn som bilete på ønsket.
+  const tingskjema = el.form?.dataset.skjema === 'ting' ? el.form : $('#ark form[data-skjema=ting]');
+  const fil = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/'));
+  if (tingskjema && fil) {
+    e.preventDefault();
+    lastOppBilete(tingskjema, fil);
+    return;
+  }
   if (!el.form) return;
   if (el.form.dataset.skjema === 'ting' && el.name === 'url') setTimeout(() => tingHent(el.form), 0);
   if (el.form.dataset.skjema === 'lim' && el.name === 'url') setTimeout(() => finnHent(el.value), 0);
@@ -1547,6 +1655,10 @@ document.addEventListener('paste', e => {
 document.addEventListener('change', e => {
   const el = e.target;
   if (el.form && el.form.dataset.skjema === 'ting' && el.name === 'url') tingHent(el.form);
+  if (el.form && el.form.dataset.skjema === 'ting' && el.name === 'fil' && el.files[0]) {
+    lastOppBilete(el.form, el.files[0]);
+    el.value = '';
+  }
 });
 
 // Kjem tilbake frå ein butikk: vis kvar lenkja skal limast inn.
