@@ -33,7 +33,9 @@ Wrangler: `node C:\Claude\stordbrann\worker\node_modules\wrangler\bin\wrangler.j
 - Worker: `wrangler d1 create onskje` (set database_id i `wrangler.toml`),
   `wrangler d1 execute onskje --remote --file schema.sql`, `wrangler deploy`.
 - App: GitHub Pages frå `main /` i repoet `Lillerud-land1/onskje`.
-- Etter endringar i appen: aukar `CACHE` i `sw.js` berre når sw.js eller SHELL-filene endrar seg.
+- Etter endringar i appen: køyr `bash versjon.sh` før commit. Då får appen beskjed om ny versjon
+  når nokon dreg ned / trykkjer Oppdater, eller opnar appen att (utan å måtte lukke henne).
+- Auk `CACHE` i `sw.js` berre når sw.js eller SHELL-filene endrar seg.
 
 ## Personvern
 
