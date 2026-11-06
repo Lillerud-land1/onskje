@@ -1,5 +1,5 @@
 // Offline-støtte: sida blir henta frå nettet når det går, elles frå lageret.
-const CACHE = 'onskje-v1';
+const CACHE = 'onskje-v2';
 const SHELL = [
   './',
   './index.html',
@@ -28,6 +28,8 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (url.origin !== location.origin && !isFont) return;
+  // Versjonsfila skal alltid kome rett frå nettet.
+  if (url.pathname.endsWith('/versjon.txt')) return;
 
   if (req.mode === 'navigate') {
     // «no-cache» spør nettstaden kvar gong, så ein ny versjon kjem med ein gong.
