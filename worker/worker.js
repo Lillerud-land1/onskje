@@ -309,6 +309,7 @@ function rensListe(d) {
   return {
     namn,
     til: tekst(d.til, 40),
+    rangert: d.rangert !== false,
     farge: FARGAR.includes(d.farge) ? d.farge : 'bringebaer',
     anledning: ANLEDNINGAR.includes(d.anledning) ? d.anledning : '',
     dato: /^\d{4}-\d{2}-\d{2}$/.test(d.dato || '') ? d.dato : '',
@@ -564,10 +565,11 @@ async function forhandsvis(env, b, url) {
   }
   const ut = { url: u.toString(), tittel: '', bilete: '', pris: null, valuta: '', butikk: vert.replace(/^www\./, '') };
   // Når butikken stengjer for oss, kan namnet ofte lesast ut av sjølve lenkja.
-  const delvis = melding => {
+  // sperra = butikken stengjer for appar (appen viser då Prisjakt og «Legg til»-knappen).
+  const delvis = (melding, sperra = false) => {
     const namn = namnFraLenkje(u);
     return svar({
-      ...ut, url: u.toString(), tittel: namn, bilete: '', pris: null, valuta: '', delvis: true,
+      ...ut, url: u.toString(), tittel: namn, bilete: '', pris: null, valuta: '', delvis: true, sperra,
       melding: namn ? `${melding} Namnet er henta frå lenkja – sjekk det og skriv inn prisen.` : `${melding} Fyll inn sjølv.`,
     });
   };
@@ -582,14 +584,14 @@ async function forhandsvis(env, b, url) {
         signal: ctl.signal,
       });
     } catch {
-      return delvis('Butikken svarte ikkje.');
+      return delvis('Butikken svarte ikkje.', true);
     }
     if (res.url) {
       const endeleg = new URL(res.url);
       // Sendt vidare til framsida? Då finst ikkje produktet (lenger) på den adressa.
       if (endeleg.pathname.replace(/\/+$/, '') === '' && u.pathname.replace(/\/+$/, '') !== '') {
         res.body?.cancel();
-        return delvis('Butikken sende oss til framsida.');
+        return delvis('Butikken sende oss til framsida.', true);
       }
       ut.url = res.url;
       ut.butikk = endeleg.hostname.replace(/^www\./, '');
@@ -597,7 +599,7 @@ async function forhandsvis(env, b, url) {
     const type = res.headers.get('content-type') || '';
     if (!res.ok || !/html/i.test(type)) {
       res.body?.cancel();
-      return res.ok ? delvis('Lenkja er ikkje ei nettside.') : delvis('Butikken stengjer for automatisk henting.');
+      return res.ok ? delvis('Lenkja er ikkje ei nettside.') : delvis('Butikken sperrar for at appar hentar sidene.', true);
     }
     const funne = await lesSide(res);
     Object.assign(ut, tolk(funne, ut.url, ut.butikk));

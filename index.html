@@ -9,7 +9,7 @@
 <meta property="og:description" content="Sjå ønskja og reserver det du vil gi. Den som eig lista, ser ikkje kva som er reservert.">
 <meta property="og:image" content="https://lillerud-land1.github.io/onskje/icons/icon-512.png">
 <meta name="theme-color" content="#ECEFF3">
-<meta name="onskje-versjon" content="4d8613025073">
+<meta name="onskje-versjon" content="7fc0f5213ed9">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -76,21 +76,24 @@ body.farga .merke svg .hol { fill: var(--lf); }
 .kontoknapp.prikk::after { content: ''; position: absolute; top: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--aksent); border: 2px solid var(--bg); }
 body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf); }
 
-.faner {
+.botn-faner {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: grid; grid-template-columns: repeat(3, 1fr);
   height: calc(var(--faner-h) + var(--botn)); padding-bottom: var(--botn);
   background: var(--flate); border-top: 1px solid var(--linje);
+  transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden;
 }
-.faner a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; font-size: 12.5px; font-weight: 550; color: var(--gra); }
-.faner a[aria-current="page"] { color: var(--blekk); font-weight: 700; }
-.faner a[aria-current="page"] svg.ik { stroke-width: 2.3; }
+.botn-faner a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; font-size: 12.5px; font-weight: 550; color: var(--gra); }
+.botn-faner a[aria-current="page"] { color: var(--blekk); font-weight: 700; }
+.botn-faner a[aria-current="page"] svg.ik { stroke-width: 2.3; }
+.topp-faner { display: none; }
 @media (min-width: 860px) {
   body { padding-bottom: 0; }
-  .faner { position: static; display: flex; height: auto; padding: 0; background: none; border: 0; gap: 4px; margin-right: 8px; }
-  .faner a { flex-direction: row; gap: 8px; font-size: 15px; padding: 8px 14px; border-radius: 999px; color: inherit; opacity: .72; }
-  .faner a[aria-current="page"] { opacity: 1; background: color-mix(in srgb, currentColor 10%, transparent); }
-  .faner a svg.ik { width: 19px; height: 19px; }
+  .botn-faner { display: none; }
+  .topp-faner { display: flex; gap: 4px; margin-right: 8px; }
+  .topp-faner a { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 550; padding: 8px 14px; border-radius: 999px; color: inherit; opacity: .72; text-decoration: none; }
+  .topp-faner a[aria-current="page"] { opacity: 1; font-weight: 700; background: color-mix(in srgb, currentColor 10%, transparent); }
+  .topp-faner a svg.ik { width: 19px; height: 19px; }
 }
 
 /* ---------- Sider ---------- */
@@ -179,6 +182,7 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .bryter button { border: 0; background: none; height: 34px; padding: 0 12px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--gra); display: inline-flex; align-items: center; gap: 6px; }
 .bryter button svg.ik { width: 18px; height: 18px; }
 .bryter.ikon button { padding: 0 10px; }
+@media (max-width: 480px) { .bryter .bt { display: none; } .verktoy { gap: 8px; } }
 .bryter.ikon button svg.ik { width: 20px; height: 20px; }
 .bryter button[aria-pressed="true"] { background: var(--flate); color: var(--blekk); box-shadow: 0 1px 2px rgba(28,34,51,.12); }
 
@@ -227,6 +231,8 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .rang-merke { position: absolute; top: 9px; left: 9px; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; background: var(--lf); color: #fff; display: grid; place-items: center; font-weight: 800; font-stretch: 80%; font-size: 17px; }
 .rute-tekst { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
 .rute .tittel { font-size: 15.5px; }
+.rad.utan-nr { grid-template-columns: minmax(0, 1fr) auto; padding-left: 8px; }
+.rad.utan-nr .rad-res { grid-column: 1 / -1; }
 .rute .rad-res { padding: 0 10px 10px; grid-column: auto; margin-top: auto; }
 .rute .res-knapp { width: 100%; white-space: normal; height: auto; min-height: 40px; padding: 6px 10px; line-height: 1.2; }
 .rute .res-status { font-size: 13px; }
@@ -236,8 +242,9 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
   height: 56px; padding: 0 24px 0 20px; border-radius: 999px; border: 0; background: var(--blekk); color: #fff;
   font-weight: 700; font-size: 16.5px; display: inline-flex; align-items: center; gap: 8px;
   box-shadow: 0 14px 28px -10px rgba(28,34,51,.55);
+  transform: translateZ(0);
 }
-.fab:active { transform: scale(.97); }
+.fab:active { transform: translateZ(0) scale(.97); }
 @media (min-width: 860px) { .fab { bottom: 28px; } }
 @media (max-width: 480px) {
   .rad { grid-template-columns: 38px minmax(0, 1fr) auto; column-gap: 4px; padding: 8px 2px 8px 4px; }
@@ -254,8 +261,9 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .sokeskjema { display: flex; gap: 10px; }
 .sokefelt { flex: 1; position: relative; display: block; }
 .sokefelt svg.ik { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gra); pointer-events: none; }
-.sokefelt input { width: 100%; height: 56px; border-radius: 18px; border: 1.5px solid var(--linje2); background: var(--flate); padding: 0 16px 0 48px; font-size: 17px; }
-.sokefelt input:focus { outline: none; border-color: var(--blekk); box-shadow: 0 0 0 4px rgba(28,34,51,.10); }
+.sokefelt input[type=search] { width: 100%; height: 56px; border-radius: 18px; border: 1.5px solid var(--linje2); background: var(--flate); padding: 0 16px 0 50px; font-size: 17px; -webkit-appearance: none; appearance: none; }
+.sokefelt input[type=search]::-webkit-search-decoration { -webkit-appearance: none; }
+.sokefelt input[type=search]:focus { outline: none; border-color: var(--blekk); box-shadow: 0 0 0 4px rgba(28,34,51,.10); }
 .sokeskjema .knapp { height: 56px; border-radius: 18px; padding: 0 22px; }
 .brikker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .brikke { height: 38px; padding: 0 15px; border-radius: 999px; border: 1.5px solid var(--linje2); background: var(--flate); font-size: 15px; font-weight: 560; }
@@ -353,6 +361,15 @@ details.fleire summary { cursor: pointer; font-weight: 650; color: var(--gra); p
 .lenkjeboks .knapp { height: 50px; border-radius: 14px; }
 .kode { font-size: 24px; font-weight: 750; letter-spacing: .06em; text-align: center; background: var(--flate2); border-radius: 16px; padding: 18px 10px; margin: 14px 0; font-variant-numeric: tabular-nums; user-select: all; }
 
+.sperra { background: #FFF3DF; border-radius: 14px; padding: 12px 14px; color: var(--blekk); font-size: 14.5px; margin-top: 4px; }
+.sperra p { margin: 0 0 10px; }
+.knapp-tips { padding: 18px 20px; margin-top: 28px; }
+.knapp-tips h2 { font-size: 18px; font-weight: 720; margin: 0 0 4px; }
+.knapp-tips p { margin: 0 0 14px; color: var(--gra); }
+.ark-del { font-size: 17px; font-weight: 720; margin: 22px 0 6px; }
+.steg { margin: 0 0 14px; padding-left: 22px; }
+.steg li { margin: 6px 0; }
+.dra-knapp { border-style: dashed; cursor: grab; }
 .byt-konto { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--linje); display: flex; flex-direction: column; gap: 10px; }
 .byt-konto > span { color: var(--gra); font-weight: 600; }
 .knappar-rad { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -392,7 +409,7 @@ html.kan-dra, html.kan-dra body { overscroll-behavior-y: none; }
     <svg viewBox="0 0 20 26" aria-hidden="true"><path class="lappform" d="M5 0h10l5 4.5V23a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V4.5z"/><circle class="hol" cx="10" cy="5.6" r="2.1"/></svg>
     ønskje
   </a>
-  <nav class="faner" aria-label="Hovudmeny">
+  <nav class="faner topp-faner" aria-label="Hovudmeny">
     <a href="#/" data-fane="lister"><svg class="ik" viewBox="0 0 24 24"><path d="M8 3h8l4 3.6V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.6z"/><circle cx="12" cy="7.5" r="1.4"/><path d="M8 13h8M8 17h5"/></svg>Listene mine</a>
     <a href="#/finn" data-fane="finn"><svg class="ik" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Finn</a>
     <a href="#/delt" data-fane="delt"><svg class="ik" viewBox="0 0 24 24"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14"/><path d="M12 7c-1.5-3-5-4-5.5-1.8C6.1 7 9.5 7 12 7zm0 0c1.5-3 5-4 5.5-1.8C17.9 7 14.5 7 12 7z"/></svg>Delt med meg</a>
@@ -400,6 +417,11 @@ html.kan-dra, html.kan-dra body { overscroll-behavior-y: none; }
   <button class="ikonknapp" id="oppdaterknapp" data-act="oppdater" aria-label="Oppdater" title="Oppdater"><svg class="ik" viewBox="0 0 24 24"><path d="M19.5 12.5a7.5 7.5 0 1 1-2.2-5.8"/><path d="M19.5 4v4.5H15"/></svg></button>
   <button class="kontoknapp" id="kontoknapp" data-act="konto" aria-label="Konto"></button>
 </header>
+<nav class="faner botn-faner" aria-label="Hovudmeny">
+    <a href="#/" data-fane="lister"><svg class="ik" viewBox="0 0 24 24"><path d="M8 3h8l4 3.6V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.6z"/><circle cx="12" cy="7.5" r="1.4"/><path d="M8 13h8M8 17h5"/></svg>Listene mine</a>
+    <a href="#/finn" data-fane="finn"><svg class="ik" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Finn</a>
+    <a href="#/delt" data-fane="delt"><svg class="ik" viewBox="0 0 24 24"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14"/><path d="M12 7c-1.5-3-5-4-5.5-1.8C6.1 7 9.5 7 12 7zm0 0c1.5-3 5-4 5.5-1.8C17.9 7 14.5 7 12 7z"/></svg>Delt med meg</a>
+  </nav>
 <div class="ptr" id="ptr" aria-hidden="true"><svg class="ik" viewBox="0 0 24 24"><path d="M19.5 12.5a7.5 7.5 0 1 1-2.2-5.8"/><path d="M19.5 4v4.5H15"/></svg></div>
 <main id="app"></main>
 <div class="ark-bak" id="arkbak" hidden><div class="ark" id="ark" role="dialog" aria-modal="true" aria-labelledby="arktittel"></div></div>
@@ -436,6 +458,8 @@ const BUTIKKAR = [
   ['Google Shopping', 'google.com', q => `https://www.google.com/search?udm=28&q=${q}`],
 ];
 const IDEAR = ['Hovudtelefonar', 'Lego', 'Bøker', 'Parfyme', 'Turutstyr', 'Kaffimaskin', 'Smykke', 'Brettspel', 'Gåvekort', 'Hettegenser'];
+const BUTIKKNAMN = { 'elkjop.no': 'Elkjøp', 'komplett.no': 'Komplett', 'zalando.no': 'Zalando', 'power.no': 'Power', 'xxl.no': 'XXL', 'clasohlson.com': 'Clas Ohlson', 'ikea.com': 'IKEA', 'prisjakt.no': 'Prisjakt', 'finn.no': 'Finn.no', 'ark.no': 'ARK' };
+const butikkNamn = v => BUTIKKNAMN[String(v || '').toLowerCase().replace(/^www\./, '')] || v || 'Butikken';
 const MND = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
 
 const IK = {
@@ -597,7 +621,7 @@ async function hentMeg() {
   else oppdaterKontoknapp();
 }
 
-const reinListe = l => ({ namn: l.namn, til: l.til || '', farge: l.farge, anledning: l.anledning || '', dato: l.dato || '', skildring: l.skildring || '', visning: l.visning || 'rangert' });
+const reinListe = l => ({ namn: l.namn, til: l.til || '', rangert: l.rangert !== false, farge: l.farge, anledning: l.anledning || '', dato: l.dato || '', skildring: l.skildring || '', visning: l.visning || 'rangert' });
 const reinTing = t => ({ tittel: t.tittel, url: t.url || '', bilete: t.bilete || '', pris: t.pris ?? null, valuta: t.valuta || '', butikk: t.butikk || '', notat: t.notat || '', antal: t.antal || 1, favoritt: !!t.favoritt });
 
 async function lagreListe(l) {
@@ -728,16 +752,21 @@ function visListe(id) {
     return h;
   }
   const v = l.visning === 'rutenett' ? 'rutenett' : 'rangert';
+  const utanNr = l.rangert === false;
   h += `<div class="verktoy">
     <div class="bryter" role="group" aria-label="Vis som">
-      <button data-act="visning" data-v="rangert" data-liste="${esc(l.id)}" aria-pressed="${v === 'rangert'}">${IK.rangert}Rangert</button>
-      <button data-act="visning" data-v="rutenett" data-liste="${esc(l.id)}" aria-pressed="${v === 'rutenett'}">${IK.rutenett}Rutenett</button>
+      <button data-act="visning" data-v="rangert" data-liste="${esc(l.id)}" aria-pressed="${v === 'rangert'}" aria-label="Liste">${IK.rangert}<span class="bt">Liste</span></button>
+      <button data-act="visning" data-v="rutenett" data-liste="${esc(l.id)}" aria-pressed="${v === 'rutenett'}" aria-label="Rutenett">${IK.rutenett}<span class="bt">Rutenett</span></button>
+    </div>
+    <div class="bryter" role="group" aria-label="Nummer">
+      <button data-act="nummer" data-nr="ja" data-liste="${esc(l.id)}" aria-pressed="${!utanNr}" title="Nummerert etter kva du ønskjer mest">1 2 3</button>
+      <button data-act="nummer" data-nr="nei" data-liste="${esc(l.id)}" aria-pressed="${utanNr}" title="Utan nummer">Utan nr.</button>
     </div>
     ${v === 'rangert' && ting.length > 1 ? `<span class="hint">Dra i prikkane for å endre rekkjefølgja</span>` : ''}
   </div>`;
   h += v === 'rangert'
-    ? `<ol class="ranka" data-liste="${esc(l.id)}">${ting.map((t, i) => radHtml(t, i, { eigar: true })).join('')}</ol>`
-    : `<ul class="rutenett">${ting.map((t, i) => ruteHtml(t, i, { eigar: true })).join('')}</ul>`;
+    ? `<ol class="ranka" data-liste="${esc(l.id)}">${ting.map((t, i) => radHtml(t, i, { eigar: true, utanNr })).join('')}</ol>`
+    : `<ul class="rutenett">${ting.map((t, i) => ruteHtml(t, i, { eigar: true, utanNr })).join('')}</ul>`;
   h += `</div><button class="fab" data-act="nyTing" data-liste="${esc(l.id)}">${IK.pluss}Nytt ønske</button>`;
   return h;
 }
@@ -747,8 +776,8 @@ function tingMeta(t) {
 }
 
 function radHtml(t, i, o) {
-  return `<li class="rad${o.reservert ? ' reservert' : ''}" data-ting="${esc(t.id)}">
-    <span class="rang" aria-label="Nummer ${i + 1}">${i + 1}</span>
+  return `<li class="rad${o.reservert ? ' reservert' : ''}${o.utanNr ? ' utan-nr' : ''}" data-ting="${esc(t.id)}">
+    ${o.utanNr ? '' : `<span class="rang" aria-label="Nummer ${i + 1}">${i + 1}</span>`}
     <button class="rad-opne" data-act="${o.eigar ? 'opneTing' : 'opneDeltTing'}" data-ting="${esc(t.id)}">
       ${bilde(t)}
       <span class="rad-tekst">
@@ -766,7 +795,7 @@ function ruteHtml(t, i, o) {
   return `<li class="rute${o.reservert ? ' reservert' : ''}" data-ting="${esc(t.id)}">
     <button class="rute-opne" data-act="${o.eigar ? 'opneTing' : 'opneDeltTing'}" data-ting="${esc(t.id)}">
       ${bilde(t)}
-      <span class="rang-merke" aria-label="Nummer ${i + 1}">${i + 1}</span>
+      ${o.utanNr ? '' : `<span class="rang-merke" aria-label="Nummer ${i + 1}">${i + 1}</span>`}
       <span class="rute-tekst"><span class="tittel">${esc(t.tittel)}${t.favoritt ? `<span class="fav" title="Mest ønskt">${IK.hjarte}</span>` : ''}</span>${tingMeta(t)}</span>
     </button>
     ${o.res || ''}
@@ -819,7 +848,7 @@ function visDeltListe(delid) {
   if (!ting.length) return h + `<div class="panel tomboks" style="margin-top:20px"><h2>Lista er tom enno</h2><p>Kom tilbake seinare – ønska dukkar opp her når dei blir lagde til.</p></div></div>`;
   h += `<div class="verktoy">
     <div class="bryter" role="group" aria-label="Sorter">
-      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="rang" aria-pressed="${val.sort !== 'pris'}">Ønska mest</button>
+      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="rang" aria-pressed="${val.sort !== 'pris'}">${l.rangert === false ? 'Standard' : 'Ønska mest'}</button>
       <button data-act="deltSort" data-delid="${esc(delid)}" data-s="pris" aria-pressed="${val.sort === 'pris'}">Billegast</button>
     </div>
     <div class="bryter ikon" role="group" aria-label="Vis som" style="margin-left:auto">
@@ -829,7 +858,7 @@ function visDeltListe(delid) {
   </div>`;
   const rad = t => {
     const ri = eigar ? null : resInfo(t, reservert);
-    const o = { eigar: false, reservert: ri && ri.att === 0, res: ri ? resHtml(t, ri) : '' };
+    const o = { eigar: false, utanNr: l.rangert === false, reservert: ri && ri.att === 0, res: ri ? resHtml(t, ri) : '' };
     return v === 'rutenett' ? ruteHtml(t, rang.get(t.id), o) : radHtml(t, rang.get(t.id), o);
   };
   h += v === 'rutenett' ? `<ul class="rutenett">${ting.map(rad).join('')}</ul>` : `<ol class="ranka">${ting.map(rad).join('')}</ol>`;
@@ -905,7 +934,21 @@ function visFinn() {
       <ul class="butikkar">${BUTIKKAR.map(([n, d, f]) => `<li><a href="${esc(f(e))}" target="_blank" rel="noopener" data-act="ut"><strong>${esc(n)}</strong><span>${esc(d)}</span></a></li>`).join('')}</ul>`;
   }
   h += limBoks();
+  h += `<section class="panel knapp-tips">
+    <h2>Elkjøp, Komplett eller Zalando?</h2>
+    <p>Nokre butikkar sperrar for at appar hentar bilete og pris. Med «Legg til i Ønskje»-knappen i nettlesaren får du med alt likevel – frå kva butikk som helst.</p>
+    <button class="knapp" data-act="knappHjelp">${IK.pluss}Set opp knappen</button>
+  </section>`;
   return h + '</div>';
+}
+
+// Butikkar som Elkjøp sperrar for at appar les sidene. Vis kva som skjedde, og to vegar vidare.
+function sperraHtml(d) {
+  return `<div class="sperra"><p><b>${esc(butikkNamn(d.butikk))}</b> sperrar for at appar hentar bilete og pris frå sidene sine.${d.tittel ? ' Namnet er henta frå lenkja.' : ''}</p>
+    <div class="knappar-rad">
+      <a class="knapp liten" href="${esc(prisjakt(d.tittel || ''))}" target="_blank" rel="noopener" data-act="ut">${IK.sok}Finn på Prisjakt</a>
+      <button type="button" class="knapp liten" data-act="knappHjelp">${IK.pluss}«Legg til»-knappen</button>
+    </div></div>`;
 }
 
 function limBoks() {
@@ -916,7 +959,8 @@ function limBoks() {
     const d = f.fv;
     fv = `<div class="panel fv-kort">
       ${bilde({ tittel: d.tittel || d.butikk, bilete: d.bilete })}
-      <div><strong>${esc(d.tittel || 'Fann ikkje namnet')}</strong>${tingMeta({ pris: d.pris, valuta: d.valuta, butikk: d.butikk })}${d.melding ? `<p class="fv-melding feil">${esc(d.melding)}</p>` : ''}</div>
+      <div><strong>${esc(d.tittel || 'Fann ikkje namnet')}</strong>${tingMeta({ pris: d.pris, valuta: d.valuta, butikk: d.butikk })}${!d.sperra && d.melding ? `<p class="fv-melding feil">${esc(d.melding)}</p>` : ''}</div>
+      ${d.sperra ? `<div style="grid-column:1/-1">${sperraHtml(d)}</div>` : ''}
       <button class="knapp hoved heil" data-act="leggTilFunne">${IK.pluss}Legg til i ei liste</button>
     </div>`;
   }
@@ -994,6 +1038,7 @@ function arkListe(l) {
     <label class="felt"><span>Kven er lista til?</span><input type="text" name="til" value="${esc(l.til ?? (ny ? (localStorage.getItem(LS.til) || '') : ''))}" maxlength="40" placeholder="Emma" autocomplete="given-name"><small>Blir vist for dei du deler lista med, så dei veit kven ho er til.</small></label>
     <label class="felt"><span>Dato</span><input type="date" name="dato" value="${esc(l.dato)}"><small>Valfritt. Viser kor mange dagar det er att.</small></label>
     <label class="felt"><span>Melding til dei som ser lista</span><textarea name="skildring" maxlength="500" rows="2" placeholder="Storleik M på klede, sko 39.">${esc(l.skildring)}</textarea></label>
+    <label class="sjekk"><input type="checkbox" name="rangert" ${l.rangert !== false ? 'checked' : ''}><span>Nummerer ønska (1, 2, 3) etter kva du ønskjer mest</span></label>
     <div class="felt"><span>Farge</span>
       <div class="fargeval">${Object.entries(FARGAR).map(([k, [c, n]]) => `<label title="${n}"><input type="radio" name="farge" value="${k}" ${l.farge === k ? 'checked' : ''} aria-label="${n}"><span style="--c:${c}"></span></label>`).join('')}</div>
     </div>
@@ -1028,6 +1073,7 @@ function arkTing(liste, t, forh) {
     ? `<label class="felt"><span>Liste</span><select name="liste">${L.map(x => `<option value="${esc(x.id)}" ${x.id === valt ? 'selected' : ''}>${esc(x.namn)}</option>`).join('')}${L.length ? '' : `<option value="__ny" selected>Ny liste: Ønskjelista mi</option>`}</select></label>`
     : '';
   opneArk(`${arkHovud(ny ? 'Nytt ønske' : 'Endre ønsket')}
+  ${forh && !S.namn && !S.lister.length ? `<div class="notis" style="margin:4px 0 6px"><p>Ser du ikkje listene dine? Logg inn med kontoen din, så kjem dei fram her.</p><button type="button" class="knapp liten" data-act="loggInnArk">Logg inn</button></div>` : ''}
   <form data-skjema="ting" data-liste="${liste ? esc(liste.id) : ''}" data-ting="${ny ? '' : esc(t.id)}" data-valuta="${esc(t.valuta || '')}">
     <label class="felt"><span>Lenkje til produktet</span>
       <div class="lim-rad"><input type="url" name="url" value="${esc(t.url)}" placeholder="Lim inn frå nettbutikken" inputmode="url" autocomplete="off"><button type="button" class="knapp" data-act="limInnTing">${IK.lim}Lim inn</button></div>
@@ -1138,8 +1184,14 @@ async function tingHent(f) {
     const d = await api('/forhandsvis?url=' + encodeURIComponent(url));
     if (!document.contains(f)) return;
     fyllTing(f, d);
-    m.className = 'fv-melding ' + (d.delvis ? 'feil' : 'ok');
-    m.textContent = d.delvis ? d.melding : `Henta frå ${d.butikk}. Sjekk at det stemmer.`;  } catch (e) {
+    if (d.sperra) {
+      m.className = 'fv-melding';
+      m.innerHTML = sperraHtml(d);
+    } else {
+      m.className = 'fv-melding ' + (d.delvis ? 'feil' : 'ok');
+      m.textContent = d.delvis ? d.melding : `Henta frå ${butikkNamn(d.butikk)}. Sjekk at det stemmer.`;
+    }
+  } catch (e) {
     if (!document.contains(f)) return;
     m.className = 'fv-melding feil';
     m.textContent = e.message;
@@ -1158,6 +1210,39 @@ function fyllTing(f, d) {
   sett('butikk', d.butikk);
   if (d.pris != null) f.dataset.valuta = d.valuta || 'NOK';
   oppdaterSkjemaBilde(f);
+}
+
+// ---------- «Legg til i Ønskje»-knappen ----------
+// Eit bokmerke som køyrer i nettlesaren din på sida du ser på: les namn, bilete og pris
+// (schema.org / og-taggar) og opnar Ønskje med det ferdig utfylt. Ingen server les butikksida.
+function knappKode() {
+  const base = location.origin + location.pathname;
+  return "javascript:(function(){var d=document,t='',b='',p='',v='';function q(n){var e=d.querySelector('meta[property=\"'+n+'\"],meta[name=\"'+n+'\"],meta[itemprop=\"'+n+'\"]');return e?e.getAttribute('content')||'':''}"
+    + "function g(o,k){if(!o||typeof o!='object'||k>6)return;if(Array.isArray(o)){o.forEach(function(x){g(x,k+1)});return}var y=[].concat(o['@type']||[]).join(' ');"
+    + "if(/Product/.test(y)){t=t||o.name||'';var m=o.image;if(m&&!b)b=typeof m=='string'?m:Array.isArray(m)?(typeof m[0]=='string'?m[0]:(m[0]||{}).url||''):m.url||''}"
+    + "if(/Offer/.test(y)&&!p){p=o.price||o.lowPrice||(o.priceSpecification||{}).price||'';v=o.priceCurrency||''}"
+    + "['@graph','offers','hasVariant','mainEntity'].forEach(function(x){if(o[x])g(o[x],k+1)})}"
+    + "d.querySelectorAll('script[type=\"application/ld+json\"]').forEach(function(s){try{g(JSON.parse(s.textContent),0)}catch(e){}});"
+    + "t=t||q('og:title')||d.title;b=b||q('og:image')||q('twitter:image');p=p||q('product:price:amount')||q('og:price:amount')||q('price');v=v||q('product:price:currency')||q('priceCurrency');"
+    + "try{b=b?new URL(b,location.href).href:''}catch(e){b=''}var e=encodeURIComponent;"
+    + "location.href='" + base + "?leggtil='+e(location.href)+'&tittel='+e(String(t).trim().slice(0,200))+(b?'&bilete='+e(b):'')+(p?'&pris='+e(p):'')+(v?'&valuta='+e(v):'')})()";
+}
+function arkKnapp() {
+  const kode = knappKode();
+  opneArk(`${arkHovud('«Legg til i Ønskje»-knappen')}
+    <p>Med denne knappen i nettlesaren legg du til frå <b>kva nettbutikk som helst</b> – også Elkjøp, Komplett og Zalando. Han les namn, bilete og pris frå sida du ser på, og opnar Ønskje med alt utfylt.</p>
+    <h3 class="ark-del">På iPhone (Safari)</h3>
+    <ol class="steg">
+      <li>Trykk <b>Kopier koden</b> under.</li>
+      <li>Opne Safari på ei kva som helst side. Trykk Del-knappen og vel <b>Legg til bokmerke</b>, og så <b>Arkiver</b>.</li>
+      <li>Trykk bok-ikonet, vel <b>Rediger</b> og trykk på bokmerket du nett laga.</li>
+      <li>Kall det <b>Legg til i Ønskje</b>. Slett adressa, lim inn koden, og trykk <b>Ferdig</b>.</li>
+    </ol>
+    <button class="knapp hoved heil" data-act="kopier" data-tekst="${esc(kode)}">${IK.lim}Kopier koden</button>
+    <p class="dempa">Bruk: Når du ser på eit produkt i Safari, trykk bok-ikonet og vel «Legg til i Ønskje».</p>
+    <h3 class="ark-del">På PC</h3>
+    <p>Dra knappen under opp til bokmerkelinja. Ser du ikkje linja, trykk Ctrl+Shift+B.</p>
+    <a class="knapp heil dra-knapp" href="${esc(kode)}" data-act="draKnapp">${IK.pluss}Legg til i Ønskje</a>`);
 }
 
 // ---------- Vis eitt ønske ----------
@@ -1300,6 +1385,8 @@ const H = {
   konto: () => arkKonto(),
   loggInnArk: () => arkKonto('inn'),
   lagKontoArk: () => arkKonto('ny'),
+  knappHjelp: () => arkKnapp(),
+  draKnapp: (el, e) => { e.preventDefault(); toast('Dra knappen opp til bokmerkelinja i staden for å trykke på han her.'); },
   oppdater: () => oppdater(),
   gloymt: () => arkKonto('gloymt'),
   nyListe: () => arkListe(null),
@@ -1323,6 +1410,15 @@ const H = {
     const l = finnListe(el.dataset.liste);
     if (!l || l.visning === el.dataset.v) return;
     l.visning = el.dataset.v;
+    lagre();
+    vis();
+    try { await api(`/lister/${l.id}`, { metode: 'PUT', data: reinListe(l) }); } catch (e) { toast(e.message); }
+  },
+  nummer: async el => {
+    const l = finnListe(el.dataset.liste);
+    const rangert = el.dataset.nr === 'ja';
+    if (!l || (l.rangert !== false) === rangert) return;
+    l.rangert = rangert;
     lagre();
     vis();
     try { await api(`/lister/${l.id}`, { metode: 'PUT', data: reinListe(l) }); } catch (e) { toast(e.message); }
@@ -1377,8 +1473,14 @@ const H = {
     const t = el.dataset.tekst;
     try { await navigator.clipboard.writeText(t); }
     catch {
-      const f = $('#delfelt');
-      if (f) { f.select(); document.execCommand('copy'); }
+      const f = document.createElement('textarea');
+      f.value = t;
+      f.setAttribute('readonly', '');
+      f.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(f);
+      f.select();
+      document.execCommand('copy');
+      f.remove();
     }
     const før = el.textContent;
     el.textContent = 'Kopiert';
@@ -1525,7 +1627,7 @@ const SK = {
   liste: async (f, knapp) => {
     const id = f.dataset.liste;
     const l = id ? finnListe(id) : { id: lagId(), ting: [], visning: 'rangert' };
-    const ny = { ...l, namn: f.namn.value.trim(), til: f.til.value.trim(), dato: f.dato.value, skildring: f.skildring.value.trim(), anledning: f.anledning.value, farge: f.farge.value || 'bringebaer' };
+    const ny = { ...l, namn: f.namn.value.trim(), til: f.til.value.trim(), rangert: f.rangert.checked, dato: f.dato.value, skildring: f.skildring.value.trim(), anledning: f.anledning.value, farge: f.farge.value || 'bringebaer' };
     if (!ny.namn) throw new Error('Gi lista eit namn.');
     try { if (ny.til) localStorage.setItem(LS.til, ny.til); } catch { /* lagring sperra */ }
     if (id) {
@@ -1567,6 +1669,7 @@ const SK = {
     if (d.pos != null) t.pos = d.pos;
     liste.ting.push(t);
     localStorage.setItem(LS.sist, lid);
+    S.ventarTing = null;
     lagre();
     lukkArk();
     const r = rute();
@@ -1612,6 +1715,7 @@ const SK = {
     S.lasta = false;
     vis();
     await hentMeg();
+    if (S.ventarTing) arkTing(null, null, S.ventarTing);
   },
   lagKonto: async f => {
     if (!/^[a-zæøå0-9._-]{3,30}$/i.test(f.namn.value.trim())) throw new Error('Brukarnamnet må vere 3–30 teikn: bokstavar, tal, punktum, bindestrek eller understrek.');
@@ -1794,6 +1898,7 @@ if (matchMedia('(pointer: coarse)').matches) {
 function nummerer(ol) {
   [...ol.children].forEach((li, i) => {
     const r = li.querySelector('.rang');
+    if (!r) return;
     r.textContent = i + 1;
     r.setAttribute('aria-label', `Nummer ${i + 1}`);
   });
@@ -1865,16 +1970,38 @@ document.addEventListener('keydown', e => {
 
 // ---------- Start ----------
 (function start() {
-  // Deling frå andre appar (Android) eller ?leggtil=lenkje (snarveg på iPhone)
   const p = new URLSearchParams(location.search);
-  const inn = [p.get('leggtil'), p.get('url'), p.get('text'), p.get('title')].filter(Boolean).join(' ');
-  const m = /https?:\/\/[^\s<>"']+/i.exec(inn);
-  if (m || p.has('leggtil')) {
+  let fraKnapp = null;
+  if (p.get('leggtil') && p.get('tittel')) {
+    // Frå «Legg til i Ønskje»-knappen: alt er lese frå butikksida i nettlesaren
+    const url = p.get('leggtil');
+    let butikk = '';
+    try { butikk = new URL(url).hostname.replace(/^www\./, ''); } catch { /* ugyldig */ }
+    const pris = tolkPris(p.get('pris'));
+    const valuta = (p.get('valuta') || '').toUpperCase();
+    fraKnapp = {
+      url, butikk, tittel: p.get('tittel').slice(0, 200), pris,
+      bilete: /^https?:\/\//i.test(p.get('bilete') || '') ? p.get('bilete') : '',
+      valuta: pris == null ? '' : (/^[A-Z]{3}$/.test(valuta) ? valuta : 'NOK'),
+    };
     history.replaceState(null, '', location.pathname + '#/finn');
-    if (m) setTimeout(() => finnHent(m[0]), 0);
+    S.finn.lim = url;
+    S.finn.fv = { ...fraKnapp };
+  } else {
+    // Deling frå andre appar (Android) eller ?leggtil=lenkje
+    const inn = [p.get('leggtil'), p.get('url'), p.get('text'), p.get('title')].filter(Boolean).join(' ');
+    const m = /https?:\/\/[^\s<>"']+/i.exec(inn);
+    if (m || p.has('leggtil')) {
+      history.replaceState(null, '', location.pathname + '#/finn');
+      if (m) setTimeout(() => finnHent(m[0]), 0);
+    }
   }
   vis();
-  hentMeg();
+  hentMeg().then(() => {
+    if (!fraKnapp) return;
+    S.ventarTing = fraKnapp;
+    arkTing(null, null, fraKnapp);
+  });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
