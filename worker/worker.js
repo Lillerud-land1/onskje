@@ -297,7 +297,7 @@ async function meg(env, b) {
   }
   const folgjer = f.results.map(r => {
     const d = r.data ? JSON.parse(r.data) : null;
-    return { delid: r.delid, namn: d ? d.namn : null, farge: d ? d.farge : null, n: r.n || 0 };
+    return { delid: r.delid, namn: d ? d.namn : null, til: d ? d.til || '' : '', farge: d ? d.farge : null, n: r.n || 0 };
   });
   return svar({ namn: b.namn, lister, folgjer });
 }
@@ -308,6 +308,7 @@ function rensListe(d) {
   if (!namn) throw new Feil(400, 'Lista må ha eit namn.');
   return {
     namn,
+    til: tekst(d.til, 40),
     farge: FARGAR.includes(d.farge) ? d.farge : 'bringebaer',
     anledning: ANLEDNINGAR.includes(d.anledning) ? d.anledning : '',
     dato: /^\d{4}-\d{2}-\d{2}$/.test(d.dato || '') ? d.dato : '',

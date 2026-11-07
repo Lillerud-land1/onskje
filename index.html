@@ -9,7 +9,7 @@
 <meta property="og:description" content="Sjå ønskja og reserver det du vil gi. Den som eig lista, ser ikkje kva som er reservert.">
 <meta property="og:image" content="https://lillerud-land1.github.io/onskje/icons/icon-512.png">
 <meta name="theme-color" content="#ECEFF3">
-<meta name="onskje-versjon" content="f6b22f3060e9">
+<meta name="onskje-versjon" content="4d8613025073">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -22,6 +22,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap" rel="stylesheet">
 <style>
 :root {
+  color-scheme: light;
   --bg: #ECEFF3;
   --flate: #FFFFFF;
   --flate2: #F5F7FA;
@@ -131,14 +132,19 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 }
 .lapp::before { content: ''; position: absolute; top: 8px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--flate); }
 .lr-tekst { min-width: 0; display: flex; flex-direction: column; }
-.lr-tekst strong { font-size: 18px; font-weight: 680; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-tekst strong { font-size: 18px; font-weight: 680; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .lr-meta { color: var(--gra); font-size: 14.5px; display: flex; flex-wrap: wrap; column-gap: 12px; }
+.lr-meta > span { white-space: nowrap; }
 .lr-meta .snart { color: var(--lf); font-weight: 650; }
 .mini { display: flex; }
 .mini span { width: 38px; height: 38px; border-radius: 10px; background: var(--flate2); border: 2px solid var(--flate); overflow: hidden; margin-left: -12px; }
 .mini span:first-child { margin-left: 0; }
 .mini img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-@media (max-width: 420px) { .mini span:nth-child(n+3) { display: none; } }
+@media (max-width: 420px) {
+  .mini span { width: 32px; height: 32px; margin-left: -10px; }
+  .mini span:nth-child(n+3) { display: none; }
+  .listerad { gap: 12px; padding-left: 14px; padding-right: 12px; }
+}
 .fjern { border: 0; background: none; color: var(--gra); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
 .fjern:hover { background: var(--flate2); color: var(--blekk); }
 
@@ -156,6 +162,7 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .tilbake { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600; font-size: 15px; opacity: .85; padding: 6px 0; }
 .tilbake svg.ik { width: 18px; height: 18px; }
 .helt h1 { font-size: clamp(38px, 10vw, 62px); line-height: .98; font-weight: 800; font-stretch: 76%; letter-spacing: -0.01em; margin: 10px 0 10px; text-wrap: balance; overflow-wrap: anywhere; }
+.helt-til { margin: 8px 0 -4px; font-size: 16px; font-weight: 650; opacity: .9; }
 .helt-tekst { margin: 0 0 8px; max-width: 54ch; white-space: pre-line; opacity: .92; }
 .helt-info { margin: 0; font-size: 15.5px; opacity: .92; }
 .helt-info b { font-weight: 700; }
@@ -169,8 +176,10 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .verktoy { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; flex-wrap: wrap; }
 .verktoy .hint { font-size: 14px; color: var(--gra); margin-left: auto; }
 .bryter { display: inline-flex; background: #DFE3EA; border-radius: 999px; padding: 3px; }
-.bryter button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--gra); display: inline-flex; align-items: center; gap: 6px; }
+.bryter button { border: 0; background: none; height: 34px; padding: 0 12px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--gra); display: inline-flex; align-items: center; gap: 6px; }
 .bryter button svg.ik { width: 18px; height: 18px; }
+.bryter.ikon button { padding: 0 10px; }
+.bryter.ikon button svg.ik { width: 20px; height: 20px; }
 .bryter button[aria-pressed="true"] { background: var(--flate); color: var(--blekk); box-shadow: 0 1px 2px rgba(28,34,51,.12); }
 
 /* ---------- Rangert liste ---------- */
@@ -218,7 +227,9 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 .rang-merke { position: absolute; top: 9px; left: 9px; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; background: var(--lf); color: #fff; display: grid; place-items: center; font-weight: 800; font-stretch: 80%; font-size: 17px; }
 .rute-tekst { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
 .rute .tittel { font-size: 15.5px; }
-.rute .rad-res { padding: 0 12px 12px; grid-column: auto; }
+.rute .rad-res { padding: 0 10px 10px; grid-column: auto; margin-top: auto; }
+.rute .res-knapp { width: 100%; white-space: normal; height: auto; min-height: 40px; padding: 6px 10px; line-height: 1.2; }
+.rute .res-status { font-size: 13px; }
 
 .fab {
   position: fixed; z-index: 25; right: max(18px, calc(50% - 362px)); bottom: calc(var(--faner-h) + var(--botn) + 16px);
@@ -228,6 +239,16 @@ body.farga .kontoknapp.prikk::after { background: #fff; border-color: var(--lf);
 }
 .fab:active { transform: scale(.97); }
 @media (min-width: 860px) { .fab { bottom: 28px; } }
+@media (max-width: 480px) {
+  .rad { grid-template-columns: 38px minmax(0, 1fr) auto; column-gap: 4px; padding: 8px 2px 8px 4px; }
+  .rang { font-size: 32px; }
+  .rad:first-child .rang { font-size: 42px; }
+  .rad-opne { grid-template-columns: 56px minmax(0, 1fr); gap: 11px; }
+  .rad-opne .bilde { width: 56px; height: 56px; border-radius: 12px; }
+  .handtak { width: 36px; }
+  .rad-res { padding-left: 71px; }
+  .tittel { font-size: 16px; }
+}
 
 /* ---------- Finn ---------- */
 .sokeskjema { display: flex; gap: 10px; }
@@ -291,6 +312,7 @@ input[type=text], input[type=url], input[type=search], input[type=date], input[t
   width: 100%; font-size: 16px; background: var(--flate2); border: 1.5px solid var(--linje2); border-radius: 13px; padding: 12px 14px; color: var(--blekk);
 }
 textarea { resize: vertical; min-height: 76px; line-height: 1.45; }
+input[type=date] { min-height: 50px; }
 select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235F677B' stroke-width='2'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
 input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blekk); background-color: var(--flate); box-shadow: 0 0 0 4px rgba(28,34,51,.10); }
 .to-felt { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -390,7 +412,7 @@ html.kan-dra, html.kan-dra body { overscroll-behavior-y: none; }
 // ====================================================================
 
 const API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8788' : 'https://onskje.brannlogg-admin.workers.dev';
-const LS = { token: 'onskje.token', namn: 'onskje.namn', cache: 'onskje.lister', folgjer: 'onskje.folgjer', res: 'onskje.res', mittnamn: 'onskje.mittnamn', sist: 'onskje.sistliste' };
+const LS = { token: 'onskje.token', namn: 'onskje.namn', cache: 'onskje.lister', folgjer: 'onskje.folgjer', res: 'onskje.res', mittnamn: 'onskje.mittnamn', sist: 'onskje.sistliste', til: 'onskje.til' };
 
 const FARGAR = {
   bringebaer: ['#C92F5E', 'Bringebær'],
@@ -490,8 +512,9 @@ function datoInfo(dato) {
   const i = new Date(); i.setHours(0, 0, 0, 0);
   const n = Math.round((dt - i) / 864e5);
   const dag = `${d}. ${MND[m - 1]}${y !== i.getFullYear() ? ' ' + y : ''}`;
+  const kort = `${d}. ${MND[m - 1].length > 4 ? MND[m - 1].slice(0, 3) + '.' : MND[m - 1]}${y !== i.getFullYear() ? ' ' + y : ''}`;
   const rel = n === 0 ? 'i dag' : n === 1 ? 'i morgon' : n > 1 ? `om ${n} dagar` : n === -1 ? 'i går' : `for ${-n} dagar sidan`;
-  return { dag, rel, n };
+  return { dag, kort, rel, n };
 }
 function nesteJul() {
   const i = new Date();
@@ -574,7 +597,7 @@ async function hentMeg() {
   else oppdaterKontoknapp();
 }
 
-const reinListe = l => ({ namn: l.namn, farge: l.farge, anledning: l.anledning || '', dato: l.dato || '', skildring: l.skildring || '', visning: l.visning || 'rangert' });
+const reinListe = l => ({ namn: l.namn, til: l.til || '', farge: l.farge, anledning: l.anledning || '', dato: l.dato || '', skildring: l.skildring || '', visning: l.visning || 'rangert' });
 const reinTing = t => ({ tittel: t.tittel, url: t.url || '', bilete: t.bilete || '', pris: t.pris ?? null, valuta: t.valuta || '', butikk: t.butikk || '', notat: t.notat || '', antal: t.antal || 1, favoritt: !!t.favoritt });
 
 async function lagreListe(l) {
@@ -665,7 +688,7 @@ function visLister() {
     const bil = etterPos(l.ting).filter(t => t.bilete).slice(0, 3);
     return `<li><a class="listerad" href="#/l/${esc(l.id)}" style="--lf:${farge(l.farge)}">
       <span class="lapp" aria-hidden="true">${n}</span>
-      <span class="lr-tekst"><strong>${esc(l.namn)}</strong><span class="lr-meta"><span>${ønske(n)}</span>${di && di.n >= -1 ? `<span class="${di.n <= 30 ? 'snart' : ''}">${esc(di.dag)}, ${esc(di.rel)}</span>` : ''}</span></span>
+      <span class="lr-tekst"><strong>${esc(l.namn)}</strong><span class="lr-meta"><span>${ønske(n)}</span>${di && di.n >= -1 ? `<span class="${di.n <= 30 ? 'snart' : ''}">${esc(di.kort)}, ${esc(di.rel)}</span>` : ''}</span></span>
       <span class="mini" aria-hidden="true">${bil.map(t => `<span><img src="${esc(t.bilete)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`).join('')}</span>
     </a></li>`;
   }).join('')}</ul>`;
@@ -687,6 +710,7 @@ function visListe(id) {
   const sum = ting.reduce((s, t) => s + (t.pris || 0) * (t.antal || 1), 0);
   let h = `<section class="helt"><div class="helt-inn">
     <a class="tilbake" href="#/">${IK.tilbake}Listene mine</a>
+    ${l.til ? `<p class="helt-til">Ønskjelista til ${esc(l.til)}</p>` : ''}
     <h1>${esc(l.namn)}</h1>
     ${l.skildring ? `<p class="helt-tekst">${esc(l.skildring)}</p>` : ''}
     <p class="helt-info">${di ? `<b>${esc(di.dag)}</b>, ${esc(di.rel)}<br>` : ''}${ønske(ting.length)}${sum ? `, ca. ${kr(Math.round(sum))} til saman` : ''}</p>
@@ -785,7 +809,8 @@ function visDeltListe(delid) {
   if (val.sort === 'pris') ting = [...ting].sort((a, b) => (a.pris ?? 1e12) - (b.pris ?? 1e12));
   const di = datoInfo(l.dato);
   let h = `<section class="helt"><div class="helt-inn">
-    <a class="tilbake" href="#/delt">${IK.tilbake}Delt med meg</a>
+    ${eigar ? `<a class="tilbake" href="#/l/${esc(listeid)}">${IK.tilbake}Tilbake til lista</a>` : `<a class="tilbake" href="#/delt">${IK.tilbake}Delt med meg</a>`}
+    ${l.til ? `<p class="helt-til">Ønskjelista til ${esc(l.til)}</p>` : ''}
     <h1>${esc(l.namn)}</h1>
     ${l.skildring ? `<p class="helt-tekst">${esc(l.skildring)}</p>` : ''}
     <p class="helt-info">${di ? `<b>${esc(di.dag)}</b>, ${esc(di.rel)}<br>` : ''}${ønske(ting.length)}${eigar ? '' : '. Trykk «Eg kjøper denne» på det du vil gi – den som eig lista, ser det ikkje.'}</p>
@@ -793,13 +818,13 @@ function visDeltListe(delid) {
   </div></section><div class="side">`;
   if (!ting.length) return h + `<div class="panel tomboks" style="margin-top:20px"><h2>Lista er tom enno</h2><p>Kom tilbake seinare – ønska dukkar opp her når dei blir lagde til.</p></div></div>`;
   h += `<div class="verktoy">
-    <div class="bryter" role="group" aria-label="Vis som">
-      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rangert" aria-pressed="${v === 'rangert'}">${IK.rangert}Rangert</button>
-      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rutenett" aria-pressed="${v === 'rutenett'}">${IK.rutenett}Rutenett</button>
-    </div>
     <div class="bryter" role="group" aria-label="Sorter">
       <button data-act="deltSort" data-delid="${esc(delid)}" data-s="rang" aria-pressed="${val.sort !== 'pris'}">Ønska mest</button>
-      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="pris" aria-pressed="${val.sort === 'pris'}">Pris</button>
+      <button data-act="deltSort" data-delid="${esc(delid)}" data-s="pris" aria-pressed="${val.sort === 'pris'}">Billegast</button>
+    </div>
+    <div class="bryter ikon" role="group" aria-label="Vis som" style="margin-left:auto">
+      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rangert" aria-pressed="${v === 'rangert'}" aria-label="Rangert liste" title="Rangert liste">${IK.rangert}</button>
+      <button data-act="deltVis" data-delid="${esc(delid)}" data-v="rutenett" aria-pressed="${v === 'rutenett'}" aria-label="Rutenett" title="Rutenett">${IK.rutenett}</button>
     </div>
   </div>`;
   const rad = t => {
@@ -821,7 +846,7 @@ async function hentDelt(delid, stille) {
       lagre();
     } else {
       const f = S.folgjer.find(x => x.delid === delid);
-      const snap = { delid, namn: data.liste.namn, farge: data.liste.farge, n: data.ting.length };
+      const snap = { delid, namn: data.liste.namn, til: data.liste.til || '', farge: data.liste.farge, n: data.ting.length };
       if (f) Object.assign(f, snap);
       else {
         S.folgjer.unshift(snap);
@@ -847,7 +872,7 @@ function visDelt() {
     h += `<ul class="panel listerader">${F.map(f => `<li style="display:flex;align-items:center;padding-right:8px">
       <a class="listerad" style="flex:1;--lf:${farge(f.farge)}" href="#/d/${esc(f.delid)}">
         <span class="lapp" aria-hidden="true">${f.namn ? (f.n ?? '') : '–'}</span>
-        <span class="lr-tekst"><strong>${f.namn ? esc(f.namn) : 'Lista finst ikkje lenger'}</strong><span class="lr-meta">${f.namn ? ønske(f.n || 0) : 'Ho er sletta av eigaren'}</span></span>
+        <span class="lr-tekst"><strong>${f.namn ? esc(f.namn) : 'Lista finst ikkje lenger'}</strong><span class="lr-meta">${f.namn ? `${f.til ? `<span>Til ${esc(f.til)}</span>` : ''}<span>${ønske(f.n || 0)}</span>` : 'Ho er sletta av eigaren'}</span></span>
         <span></span>
       </a>
       <button class="fjern" data-act="fjernFolgd" data-delid="${esc(f.delid)}" aria-label="Fjern «${esc(f.namn || 'lista')}» frå Delt med meg">${IK.lukk}</button>
@@ -958,14 +983,15 @@ const arkHovud = t => `<div class="ark-hovud"><h2 id="arktittel">${t}</h2><butto
 // ---------- Liste: ny / endre ----------
 function arkListe(l) {
   const ny = !l;
-  l = l || { namn: '', farge: 'bringebaer', anledning: '', dato: '', skildring: '' };
+  l = l || { namn: '', farge: 'bringebaer', anledning: '', dato: '', skildring: '', til: null };
   opneArk(`${arkHovud(ny ? 'Ny ønskjeliste' : 'Endre lista')}
   <form data-skjema="liste" data-liste="${ny ? '' : esc(l.id)}">
-    <div class="felt"><span>Kva er lista til?</span>
+    <div class="felt"><span>Anledning</span>
       <div class="brikker anledning">${ANLEDNINGAR.map(([k, n]) => `<button type="button" class="brikke" data-act="anledning" data-k="${k}" aria-pressed="${l.anledning === k}">${n}</button>`).join('')}</div>
       <input type="hidden" name="anledning" value="${esc(l.anledning)}">
     </div>
     <label class="felt"><span>Namn på lista</span><input type="text" name="namn" value="${esc(l.namn)}" maxlength="80" placeholder="Jul ${nesteJul().slice(0, 4)}" required ${ny ? 'autofocus' : ''}></label>
+    <label class="felt"><span>Kven er lista til?</span><input type="text" name="til" value="${esc(l.til ?? (ny ? (localStorage.getItem(LS.til) || '') : ''))}" maxlength="40" placeholder="Emma" autocomplete="given-name"><small>Blir vist for dei du deler lista med, så dei veit kven ho er til.</small></label>
     <label class="felt"><span>Dato</span><input type="date" name="dato" value="${esc(l.dato)}"><small>Valfritt. Viser kor mange dagar det er att.</small></label>
     <label class="felt"><span>Melding til dei som ser lista</span><textarea name="skildring" maxlength="500" rows="2" placeholder="Storleik M på klede, sko 39.">${esc(l.skildring)}</textarea></label>
     <div class="felt"><span>Farge</span>
@@ -1499,14 +1525,16 @@ const SK = {
   liste: async (f, knapp) => {
     const id = f.dataset.liste;
     const l = id ? finnListe(id) : { id: lagId(), ting: [], visning: 'rangert' };
-    const ny = { ...l, namn: f.namn.value.trim(), dato: f.dato.value, skildring: f.skildring.value.trim(), anledning: f.anledning.value, farge: f.farge.value || 'bringebaer' };
+    const ny = { ...l, namn: f.namn.value.trim(), til: f.til.value.trim(), dato: f.dato.value, skildring: f.skildring.value.trim(), anledning: f.anledning.value, farge: f.farge.value || 'bringebaer' };
     if (!ny.namn) throw new Error('Gi lista eit namn.');
+    try { if (ny.til) localStorage.setItem(LS.til, ny.til); } catch { /* lagring sperra */ }
     if (id) {
       await api(`/lister/${id}`, { metode: 'PUT', data: reinListe(ny) });
       Object.assign(l, ny);
       lagre();
       lukkArk();
       vis();
+      toast('Lagra');
     } else {
       await lagreListe(ny);
       lukkArk();
@@ -1554,7 +1582,7 @@ const SK = {
       location.hash = '#/l/' + lid;
     } else {
       vis();
-      if (!tid) toast('Ønsket er lagt til');
+      toast(tid ? 'Lagra' : 'Ønsket er lagt til');
     }
   },
   reserver: async f => {
