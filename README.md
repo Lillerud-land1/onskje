@@ -28,6 +28,15 @@ Første gong: `wrangler d1 execute onskje --local --file schema.sql` i `worker/`
 
 Wrangler: `node C:\Claude\stordbrann\worker\node_modules\wrangler\bin\wrangler.js …`
 
+## Korte delelenkjer
+
+Delelenkja er `https://onskje.pages.dev/<kode>` (7 teikn). Cloudflare Pages-prosjektet i `kortlenkje/`
+les lista frå D1, gir meldingsappar ei førehandsvising (namn, kven lista er til, første produktbilete)
+og sender vidare til appen (`#/d/<kode>`). Gamle lange lenkjer (12 teikn) verkar framleis.
+Lenkja viser alltid lista slik ho er no – ein treng ikkje dele på nytt etter endringar.
+
+Publiser kortlenkje-sida: `cd kortlenkje && node <wrangler.js> pages deploy --branch main --commit-dirty=true`
+
 ## Publisering
 
 - Worker: `wrangler d1 create onskje` (set database_id i `wrangler.toml`),
