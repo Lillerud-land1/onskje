@@ -9,7 +9,7 @@
 <meta property="og:description" content="Sjå ønskja og reserver det du vil gi. Den som eig lista, ser ikkje kva som er reservert.">
 <meta property="og:image" content="https://lillerud-land1.github.io/onskje/icons/icon-512.png">
 <meta name="theme-color" content="#ECEFF3">
-<meta name="onskje-versjon" content="7fc0f5213ed9">
+<meta name="onskje-versjon" content="318082238be1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -356,6 +356,10 @@ details.fleire summary { cursor: pointer; font-weight: 650; color: var(--gra); p
 .tv-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; color: var(--gra); }
 .tv-meta b { font-size: 22px; color: var(--blekk); font-weight: 750; font-stretch: 90%; }
 .tv-notat { white-space: pre-line; background: var(--flate2); border-radius: 14px; padding: 12px 14px; }
+.dellenkje { margin: 10px 0 4px; padding: 18px 16px; border-radius: 16px; background: var(--flate2); text-align: center; font-size: 21px; font-weight: 700; letter-spacing: .01em; overflow-wrap: anywhere; user-select: all; }
+.delinfo { margin: 18px 0 16px; padding-left: 20px; color: var(--gra); font-size: 15px; }
+.delinfo li { margin: 6px 0; }
+.delinfo b { color: var(--blekk); }
 .lenkjeboks { display: flex; gap: 8px; margin-top: 14px; }
 .lenkjeboks input { flex: 1; min-width: 0; font-size: 15px; }
 .lenkjeboks .knapp { height: 50px; border-radius: 14px; }
@@ -516,7 +520,12 @@ const kr = (p, valuta) => p == null ? '' : (valuta && valuta !== 'NOK' ? `${talF
 const ønske = n => n === 1 ? '1 ønske' : `${n} ønske`;
 const prisjakt = q => `https://www.prisjakt.no/search?query=${encodeURIComponent(q)}`;
 const finnListe = id => S.lister.find(l => l.id === id);
-const delLenkje = delid => `${location.origin}${location.pathname}#/d/${delid}`;
+const KORT = 'https://onskje.pages.dev/';
+const delKode = l => l.kort || l.delid;
+const delLenkje = l => /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+  ? `${location.origin}${location.pathname}#/d/${delKode(l)}`
+  : KORT + delKode(l);
+const utanHttps = u => u.replace(/^https?:\/\//, '');
 
 function tolkPris(s) {
   const t = String(s || '').replace(/[\s ]/g, '').replace(/kr|nok|,-/gi, '');
@@ -628,6 +637,7 @@ async function lagreListe(l) {
   await sikreKonto();
   const d = await api(`/lister/${l.id}`, { metode: 'PUT', data: reinListe(l) });
   l.delid = d.delid;
+  if (d.kort) l.kort = d.kort;
   if (d.pos != null) l.pos = d.pos;
   if (!finnListe(l.id)) S.lister.push(l);
   lagre();
@@ -909,7 +919,7 @@ function visDelt() {
   }
   h += `<form class="opnelenkje" data-skjema="opneLenkje">
     <label class="felt"><span>Har du fått ei lenkje? Lim ho inn her</span>
-      <div class="lim-rad"><input type="url" name="lenkje" placeholder="https://lillerud-land1.github.io/onskje/#/d/…" autocomplete="off"><button class="knapp">Opne</button></div>
+      <div class="lim-rad"><input type="url" name="lenkje" placeholder="onskje.pages.dev/…" autocomplete="off"><button class="knapp">Opne</button></div>
     </label>
     <p class="feilmelding" aria-live="polite"></p>
   </form>`;
@@ -1052,14 +1062,19 @@ function arkListe(l) {
 
 // ---------- Del lista ----------
 function arkDel(l) {
-  const lenkje = delLenkje(l.delid);
+  const lenkje = delLenkje(l);
+  const namn = l.til ? `Ønskjelista til ${l.til}` : l.namn;
   opneArk(`${arkHovud(`Del «${esc(l.namn)}»`)}
-    <p>Alle med lenkja kan sjå lista og reservere det dei vil kjøpe. Du får ikkje sjå kva som er reservert – så det blir ei overrasking.</p>
-    <div class="lenkjeboks"><input type="text" readonly value="${esc(lenkje)}" aria-label="Delelenkje" id="delfelt"><button class="knapp hoved" data-act="kopier" data-tekst="${esc(lenkje)}">Kopier</button></div>
+    <div class="dellenkje"><span>${esc(utanHttps(lenkje))}</span></div>
     <div class="ark-knappar">
-      ${navigator.share ? `<button class="knapp heil" data-act="delSystem" data-tekst="${esc(lenkje)}" data-namn="${esc(l.namn)}">${IK.del}Send med ein app</button>` : ''}
-      <a class="knapp heil" href="#/d/${esc(l.delid)}">Sjå lista slik andre ser ho</a>
-    </div>`);
+      ${navigator.share ? `<button class="knapp hoved heil" data-act="delSystem" data-tekst="${esc(lenkje)}" data-namn="${esc(namn)}">${IK.del}Send lenkja</button>` : ''}
+      <button class="knapp heil${navigator.share ? '' : ' hoved'}" data-act="kopier" data-tekst="${esc(lenkje)}">${IK.lim}Kopier lenkja</button>
+    </div>
+    <ul class="delinfo">
+      <li><b>Lenkja oppdaterer seg sjølv.</b> Endrar du, legg til eller slettar ønske, ser dei andre det neste gong dei opnar lenkja. Du treng ikkje dele på nytt.</li>
+      <li>Alle med lenkja kan sjå lista og reservere det dei vil kjøpe. Du får ikkje sjå kva som er reservert, så det blir ei overrasking.</li>
+    </ul>
+    <a class="knapp heil" href="#/d/${esc(delKode(l))}">Sjå lista slik andre ser ho</a>`);
 }
 
 // ---------- Ønske: ny / endre ----------
@@ -1487,7 +1502,7 @@ const H = {
     setTimeout(() => { if (document.contains(el)) el.textContent = før; }, 1800);
   },
   delSystem: async el => {
-    try { await navigator.share({ title: el.dataset.namn, text: `Ønskjelista mi: ${el.dataset.namn}`, url: el.dataset.tekst }); } catch { /* avbrote */ }
+    try { await navigator.share({ title: el.dataset.namn, text: el.dataset.namn, url: el.dataset.tekst }); } catch { /* avbrote */ }
   },
   ide: el => { S.finn.q = el.dataset.q; vis(); },
   ut: () => { S.finn.ute = true; },
@@ -1620,7 +1635,8 @@ const SK = {
   },
   lim: f => finnHent(f.url.value),
   opneLenkje: f => {
-    const m = /#\/d\/([A-Za-z0-9]{12})/.exec(f.lenkje.value) || /^([A-Za-z0-9]{12})$/.exec(f.lenkje.value.trim());
+    const v = f.lenkje.value.trim();
+    const m = /#\/d\/([A-Za-z0-9]{7,12})/.exec(v) || /pages\.dev\/([A-Za-z0-9]{7,12})(?:[/?#]|$)/.exec(v) || /^([A-Za-z0-9]{7,12})$/.exec(v);
     if (!m) { f.querySelector('.feilmelding').textContent = 'Fann ingen ønskjeliste i den lenkja.'; return; }
     location.hash = '#/d/' + m[1];
   },

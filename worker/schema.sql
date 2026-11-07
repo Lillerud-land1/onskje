@@ -32,17 +32,19 @@ CREATE TABLE IF NOT EXISTS gjenoppretting (
   laga INTEGER NOT NULL
 );
 
--- Lister. delid er den offentlege id-en i delelenkja.
+-- Lister. kort (7 teikn) er koden i delelenkja onskje.pages.dev/<kort>; delid (12 teikn) er den eldre, lange koden og verkar framleis.
 CREATE TABLE IF NOT EXISTS lister (
   id TEXT PRIMARY KEY,
   brukar TEXT NOT NULL,
   delid TEXT NOT NULL UNIQUE,
+  kort TEXT,
   data TEXT NOT NULL,
   pos REAL NOT NULL DEFAULT 0,
   laga INTEGER NOT NULL,
   endra INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS lister_brukar ON lister (brukar);
+CREATE UNIQUE INDEX IF NOT EXISTS lister_kort ON lister (kort);
 
 -- Ønske i ei liste. pos er rekkjefølgja (1 = mest ønskt).
 CREATE TABLE IF NOT EXISTS ting (

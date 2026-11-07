@@ -50,7 +50,8 @@ export default {
 };
 
 const ID = '[A-Za-z0-9]{8,32}';
-const DELID = '[A-Za-z0-9]{12}';
+// Delekode: 7 teikn (kort lenkje) eller 12 teikn (eldre lister). Begge verkar.
+const DELID = '[A-Za-z0-9]{7,12}';
 
 async function rute(req, env, url) {
   const p = url.pathname.replace(/\/+$/, '');
@@ -285,11 +286,17 @@ async function krevInnlogging(req, env) {
 // ---------- Eigne lister ----------
 async function meg(env, b) {
   const [l, t, f] = await env.DB.batch([
-    env.DB.prepare('SELECT id, delid, data, pos FROM lister WHERE brukar = ? ORDER BY pos, laga').bind(b.id),
+    env.DB.prepare('SELECT id, delid, kort, data, pos FROM lister WHERE brukar = ? ORDER BY pos, laga').bind(b.id),
     env.DB.prepare('SELECT t.id, t.liste, t.data, t.pos FROM ting t JOIN lister l ON l.id = t.liste WHERE l.brukar = ? ORDER BY t.pos, t.laga').bind(b.id),
-    env.DB.prepare('SELECT f.delid, l.data, (SELECT COUNT(*) FROM ting t WHERE t.liste = l.id) AS n FROM folgjer f LEFT JOIN lister l ON l.delid = f.delid WHERE f.brukar = ? ORDER BY f.laga DESC').bind(b.id),
+    env.DB.prepare('SELECT f.delid, l.data, (SELECT COUNT(*) FROM ting t WHERE t.liste = l.id) AS n FROM folgjer f LEFT JOIN lister l ON (l.delid = f.delid OR l.kort = f.delid) WHERE f.brukar = ? ORDER BY f.laga DESC').bind(b.id),
   ]);
-  const lister = l.results.map(r => ({ ...JSON.parse(r.data), id: r.id, delid: r.delid, pos: r.pos, ting: [] }));
+  for (const r of l.results) {
+    if (!r.kort) {
+      r.kort = await lagKort(env);
+      await env.DB.prepare('UPDATE lister SET kort = ? WHERE id = ?').bind(r.kort, r.id).run();
+    }
+  }
+  const lister = l.results.map(r => ({ ...JSON.parse(r.data), id: r.id, delid: r.delid, kort: r.kort, pos: r.pos, ting: [] }));
   const etterId = new Map(lister.map(x => [x.id, x]));
   for (const r of t.results) {
     const liste = etterId.get(r.liste);
@@ -321,20 +328,21 @@ function rensListe(d) {
 async function lagreListe(req, env, b, id) {
   const body = await lesJson(req, 4000);
   const data = rensListe(body);
-  const rad = await env.DB.prepare('SELECT brukar, delid FROM lister WHERE id = ?').bind(id).first();
+  const rad = await env.DB.prepare('SELECT brukar, delid, kort FROM lister WHERE id = ?').bind(id).first();
   const no = Date.now();
   if (rad) {
     if (rad.brukar !== b.id) throw new Feil(404, 'Fann ikkje lista.');
     await env.DB.prepare('UPDATE lister SET data = ?, endra = ? WHERE id = ?').bind(JSON.stringify(data), no, id).run();
-    return svar({ id, delid: rad.delid });
+    return svar({ id, delid: rad.delid, kort: rad.kort });
   }
   const { n, p } = await env.DB.prepare('SELECT COUNT(*) AS n, COALESCE(MIN(pos), 1) AS p FROM lister WHERE brukar = ?').bind(b.id).first();
   if (n >= MAKS_LISTER) throw new Feil(409, `Du kan ha opptil ${MAKS_LISTER} lister. Slett nokre gamle først.`);
   const delid = lagId(12);
+  const kort = await lagKort(env);
   const pos = p - 1; // nye lister kjem øvst
-  await env.DB.prepare('INSERT INTO lister (id, brukar, delid, data, pos, laga, endra) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .bind(id, b.id, delid, JSON.stringify(data), pos, no, no).run();
-  return svar({ id, delid, pos }, 201);
+  await env.DB.prepare('INSERT INTO lister (id, brukar, delid, kort, data, pos, laga, endra) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(id, b.id, delid, kort, JSON.stringify(data), pos, no, no).run();
+  return svar({ id, delid, kort, pos }, 201);
 }
 
 async function slettListe(env, b, id) {
@@ -444,7 +452,7 @@ async function slettTing(env, b, lid, tid) {
 
 // ---------- Delte lister ----------
 async function hentDelt(req, env, delid) {
-  const l = await env.DB.prepare('SELECT id, brukar, data FROM lister WHERE delid = ?').bind(delid).first();
+  const l = await listeFraDelid(env, delid);
   if (!l) throw new Feil(404, 'Fann ikkje lista. Ho kan vere sletta, eller lenkja er feil.');
   const b = await hentOkt(req, env);
   const eigar = !!b && b.id === l.brukar;
@@ -465,7 +473,7 @@ async function reserver(req, env, delid) {
   const body = await lesJson(req);
   const namn = tekst(body.namn, 40);
   if (!namn) throw new Feil(400, 'Skriv namnet ditt, så dei andre ser kven som kjøper.');
-  const l = await env.DB.prepare('SELECT id, brukar FROM lister WHERE delid = ?').bind(delid).first();
+  const l = await listeFraDelid(env, delid, 'id, brukar');
   if (!l) throw new Feil(404, 'Fann ikkje lista.');
   const b = await hentOkt(req, env);
   if (b && b.id === l.brukar) throw new Feil(403, 'Du kan ikkje reservere frå di eiga liste.');
@@ -494,8 +502,8 @@ async function angreReservasjon(req, env, id) {
 async function folg(req, env, b) {
   const body = await lesJson(req);
   const delid = String(body.delid || '');
-  if (!/^[A-Za-z0-9]{12}$/.test(delid)) throw new Feil(400, 'Ugyldig lenkje.');
-  const l = await env.DB.prepare('SELECT brukar FROM lister WHERE delid = ?').bind(delid).first();
+  if (!/^[A-Za-z0-9]{7,12}$/.test(delid)) throw new Feil(400, 'Ugyldig lenkje.');
+  const l = await listeFraDelid(env, delid, 'brukar');
   if (!l || l.brukar === b.id) return svar({ ok: true });
   await env.DB.prepare('INSERT OR IGNORE INTO folgjer (brukar, delid, laga) VALUES (?, ?, ?)').bind(b.id, delid, Date.now()).run();
   await env.DB.prepare('DELETE FROM folgjer WHERE brukar = ? AND delid NOT IN (SELECT delid FROM folgjer WHERE brukar = ? ORDER BY laga DESC LIMIT ?)')
@@ -828,6 +836,18 @@ function tekst(s, maks, fleireLiner) {
   return t.trim().slice(0, maks);
 }
 const ALFA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const KORT_ALFA = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+async function lagKort(env) {
+  for (let i = 0; i < 6; i++) {
+    const kode = Array.from(tilfeldig(7), x => KORT_ALFA[x % KORT_ALFA.length]).join('');
+    const finst = await env.DB.prepare('SELECT 1 FROM lister WHERE kort = ? OR delid = ?').bind(kode, kode).first();
+    if (!finst) return kode;
+  }
+  throw new Feil(500, 'Klarte ikkje å lage delelenkje. Prøv igjen.');
+}
+// Finn ei liste frå delelenkja (kort kode eller den gamle lange)
+const listeFraDelid = (env, delid, felt = 'id, brukar, data') =>
+  env.DB.prepare(`SELECT ${felt} FROM lister WHERE kort = ? OR delid = ?`).bind(delid, delid).first();
 const lagId = n => Array.from(tilfeldig(n), x => ALFA[x % 62]).join('');
 const tilfeldig = n => crypto.getRandomValues(new Uint8Array(n));
 const hex = buf => Array.from(new Uint8Array(buf), x => x.toString(16).padStart(2, '0')).join('');
